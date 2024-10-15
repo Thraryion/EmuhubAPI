@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ROMDelete, ROMCreate, ROMListView, ROMUpdate, ROMDownload, UserRegister, UserViewWishlist, UserAddWishlist, UserDelete, UserListView, UserRemoveWishlist, UserUpdate, RefreshToken, Login, MostPlayed ,ROMDetailView, UserDetailView, ROMSearch, ForgotPassword, ResetPassword, ProtectedRoute, Emuladores, Categorias, EmuladorCreate, EmuladorUpdate, EmuladorDelete
+from .views import ROMDelete, ROMCreate, ROMListView, ROMUpdate, ROMDownload, UserRegister, UserViewWishlist, UserAddWishlist, UserDelete, UserListView, UserRemoveWishlist, UserUpdate, RefreshToken, Login, MostPlayed ,ROMDetailView, UserDetailView, ROMSearch, ForgotPassword, ResetPassword, ProtectedRoute, Emuladores, Categorias, EmuladorCreate, EmuladorUpdate, EmuladorDelete, EmuladorDownload
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -29,5 +29,6 @@ urlpatterns = [
     path("emulador/create/", EmuladorCreate.as_view(), name="emulador-create"),
     path("emulador/update/", EmuladorUpdate.as_view(), name="emulador-update"),
     path("emulador/delete/", EmuladorDelete.as_view(), name="emulador-delete"),
+    path("emulador/<str:emulador_name>/download/", EmuladorDownload.as_view(), name="emulador-download"),
     path("categorias/", Categorias.as_view(), name="categorias")
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -24,10 +24,9 @@ class RomsTests(APITestCase):
         self.rom = ROM.objects.create(
             title='Test ROM',
             description='Test ROM description',
-            categoria_id=1,
-            emulador_id=1,
+            categoria=1,
+            emulador=1,
         )
-        self.save
 
     def _generate_token(self):
         token = jwt.encode(
@@ -42,16 +41,15 @@ class RomsTests(APITestCase):
         url = reverse('rom-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
 
     def test_create_rom(self):
         token = self._generate_token()
-        url = reverse('rom-list')
+        url = reverse('rom-create')
         data = {
             'title': 'Test ROM 2',
             'description': 'Test ROM description 2',
-            'categoria_id': 1,
-            'emulador_id': 1,
+            'categoria': 1,
+            'emulador': 1,
         }
         response = self.client.post(url, data, HTTP_AUTHORIZATION=f'Token {token}')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

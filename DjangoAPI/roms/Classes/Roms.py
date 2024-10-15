@@ -6,6 +6,8 @@ from ..serializer import ROMSerializer
 import os
 import base64
 import asyncio
+from django.http import HttpResponse
+from django.http import HttpResponse
 
 class Roms():
     def __init__(self):
@@ -30,7 +32,7 @@ class Roms():
 
     def rom_detail(self, id_rom):
         try:
-            rom = ROM.objects.get(id=rom_id)
+            rom = ROM.objects.get(id=id_rom)
             categoria = Categoria_Jogo.objects.get(id=rom.categoria_id)
             emulador = Emulador.objects.get(id=rom.emulador_id)
             data = self.create_data(rom.id, rom.title, rom.description, rom.emulador_id, rom.categoria_id, self.encode_image_to_base64(rom.image), rom.file, emulador.empresa)
@@ -68,3 +70,10 @@ class Roms():
             'file': file_name,
         }
         return rom
+
+    def download(file_path):
+            try:
+                response = FileResponse(open(file_path, 'rb'), as_attachment=True)
+                return response
+            except Exception as e:
+                return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

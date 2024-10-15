@@ -39,8 +39,8 @@ class Auth:
             return Response({'error': 'Refresh token not provided'}, status=status.HTTP_401_UNAUTHORIZED)
         try:
             payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=['HS256'])
-            user = User.objects.get(id=payload['id'])
-            token = Token.create_token(user.id, user.admin, datetime.utcnow() + timedelta(minutes=15))
+            user = User.objects.get(id=payload['user_id'])
+            token = self.Token.create_token(user.id, user.admin, datetime.utcnow() + timedelta(minutes=15))
             serializer = UserSerializer(user)
             return Response({'token': token, 'user': serializer.data})
         except jwt.ExpiredSignatureError:
