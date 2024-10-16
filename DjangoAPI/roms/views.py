@@ -108,7 +108,6 @@ class ROMDelete(APIView):
 
 class ROMDownload(APIView):
     def get(self, request, empresa, emulador_name, game_name):
-        
         empresa = empresa.lower()
         emulador_name = emulador_name.lower()
 
@@ -117,15 +116,12 @@ class ROMDownload(APIView):
         file_path = obj.file.path
         
         if file_path:
-            try:
-                response = FileResponse(open(file_path, 'rb'), as_attachment=True)
+                response = Roms.download(file_path)
                 obj.qtd_download += 1
                 obj.save()
                 return response
-            except Exception as e:
-                return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
-            return Response({'error': 'File not found'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'File not found'}, status=status.HTTP_404_NOT_FOUND)
 
 class MostPlayed(APIView):
     def get(self, request):
@@ -314,17 +310,18 @@ class EmuladorDelete(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class EmuladorDownload(APIView):
-    def get(self, request, empresa, emulador_name):
-        empresa = empresa.lower()
+    def get(self, request, emulador_name):
         emulador_name = emulador_name.lower()
-        emulador = Emulador.objects.get(nome=emulador_name, empresa=empresa)
-        obj = ROM.objects.filter(emulador_id=emulador.id)
-        serializer = ROMSerializer(obj, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        emulador = Emulador.objects.get(nome=emulador_name)
+        file_path = emulador.file.path
+        if file_path:
+            response = Roms.download(file_path)
+            return response
+        else:
+            return Response({'error': 'File not found'}, status=status.HTTP_404_NOT_FOUND)
 
 class Categorias(APIView):
     def get(self, request):
         categorias = Categoria_Jogo.objects.all()
-        print(categorias)
         serializer = CategoriaJogoSerializer(categorias, many=True)
         return Response(serializer.data)

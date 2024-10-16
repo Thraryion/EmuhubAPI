@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("roms", "0011_rom_empresa"),
+        ("roms", "0010_rom_empresa"),
     ]
 
     operations = [

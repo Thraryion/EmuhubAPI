@@ -22,7 +22,7 @@ class Emulador(models.Model):
     nome = models.CharField(max_length=125)
     console = models.CharField(max_length=125)
     empresa = models.CharField(max_length=40)
-    emu_file = models.FileField(upload_to='emuladores/' blank=True, null=True)
+    emu_file = models.FileField(upload_to='emuladores/', blank=True, null=True)
 
 class Categoria_Jogo(models.Model):
     nome = models.CharField(max_length=125)
