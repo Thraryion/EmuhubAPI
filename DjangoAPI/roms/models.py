@@ -73,3 +73,23 @@ class Postagem(models.Model):
 
 class Categoria_Forum(models.Model):
     nome = models.CharField(max_length=125)
+
+class Like(models.Model):
+    id_postagem = models.ForeignKey('Postagem', on_delete=models.CASCADE)
+    id_user = models.ForeignKey('User', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('id_postagem', 'id_user')
+
+
+class Comentario(models.Model):
+    descricao = models.TextField()
+    id_postagem = models.ForeignKey('Postagem', on_delete=models.CASCADE)
+    id_user = models.ForeignKey('User', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    id_parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
+
+    class Meta:
+        ordering = ['created_at']  # Ordenar os comentários pelo tempo de criação
