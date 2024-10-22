@@ -60,7 +60,7 @@ class Auth:
             subject = "Reset your password"
             message = f'''Olá,<br><br>
             Clique no link abaixo para alterar a senha:<br><br>
-            <a href="http://localhost:5173/reset-password?token={token}">Clique aqui</a>'''
+            <a href="http://52.45.165.140:5173/reset-password?token={token}">Clique aqui</a>'''
 
             msg = MIMEMultipart()
             msg['From'] = settings.EMAIL_HOST_USER
