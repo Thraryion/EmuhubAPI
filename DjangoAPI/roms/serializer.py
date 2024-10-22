@@ -85,11 +85,9 @@ class LikeSerializer(serializers.ModelSerializer):
 
 
 class TopicoDetailSerializer(serializers.ModelSerializer):
-    comentarios = ComentarioSerializer(many=True, read_only=True, source='comentario_set')
-
     class Meta:
         model = Topico
-        fields = ['id', 'titulo', 'descricao', 'id_categoria', 'id_user', 'comentarios', 'created_at', 'updated_at']
+        fields = ['id', 'titulo', 'descricao', 'id_categoria', 'id_user', 'created_at', 'updated_at']
 
 class ComentarioSerializer(serializers.ModelSerializer):
     class Meta:
