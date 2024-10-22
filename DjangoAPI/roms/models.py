@@ -57,11 +57,8 @@ class Mensagem(models.Model):
 #forum
 class Comunidade(models.Model):
     nome = models.CharField(max_length=125)
+    users = models.ManyToManyField('User', related_name='comunidades')
     created_at = models.DateTimeField(auto_now_add=True)
-
-class ParticipantesComunidade(models.Model):
-    id_comunidade = models.ForeignKey('Comunidade', on_delete=models.CASCADE)
-    id_user = models.ForeignKey('User', on_delete=models.CASCADE)
 
 class Topico(models.Model):
     titulo = models.CharField(max_length=125)
@@ -75,14 +72,21 @@ class Topico(models.Model):
 class Categoria_Forum(models.Model):
     nome = models.CharField(max_length=125)
 
-class Like(models.Model):
-    id_topico = models.ForeignKey('Topico', on_delete=models.CASCADE, blank=True, null=True)
-    id_comentario = models.ForeignKey('Comentario', on_delete=models.CASCADE, blank=True, null=True)
+class LikeTopico(models.Model):
+    id_topico = models.ForeignKey('Topico', on_delete=models.CASCADE)
     id_user = models.ForeignKey('User', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('id_topico', 'id_comentario', 'id_user')
+        unique_together = ('id_topico', 'id_user')
+
+class LikeComentario(models.Model):
+    id_comentario = models.ForeignKey('Comentario', on_delete=models.CASCADE)
+    id_user = models.ForeignKey('User', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('id_comentario', 'id_user')
 
 
 class Comentario(models.Model):

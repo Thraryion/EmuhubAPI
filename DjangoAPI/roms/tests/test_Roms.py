@@ -55,4 +55,32 @@ class RomsTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(ROM.objects.count(), 2)
 
+    def test_retrieve_rom(self):
+        url = reverse('rom-detail', args=[self.rom.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['title'], 'Test ROM')
+
+    def test_update_rom(self):
+        token = self._generate_token()
+        url = reverse('rom-detail', args=[self.rom.id])
+        data = {
+            'title': 'Test ROM Updated',
+            'description': 'Test ROM description Updated',
+            'categoria': 1,
+            'emulador': 1,
+        }
+        response = self.client.put(url, data, HTTP_AUTHORIZATION=f'Token {token}')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.rom.refresh_from_db()
+        self.assertEqual(self.rom.title, 'Test ROM Updated')
+
+    def test_delete_rom(self):
+        token = self._generate_token()
+        url = reverse('rom-detail', args=[self.rom.id])
+        response = self.client.delete(url, HTTP_AUTHORIZATION=f'Token {token}')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(ROM.objects.count(), 0)
+
+
     

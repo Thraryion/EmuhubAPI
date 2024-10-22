@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ROM, User, Conversa, ParticipantesCoversa, Mensagem, Postagem, Topico, Emulador, Categoria_Jogo
+from .models import ROM, User, Conversa, ParticipantesCoversa, Mensagem, Topico, Emulador, Categoria_Jogo, Comunidade, Comentario, LikeComentario, LikeTopico
 
 
 #rom serializer
@@ -73,16 +73,25 @@ class ConversaDetailSerializer(serializers.ModelSerializer):
         fields = ['id', 'mensagens', 'created_at', 'updated_at']
 
 #Forum serializers
-class PostagemSerializer(serializers.ModelSerializer):
-    id_user = serializers.ReadOnlyField(source='id_user.username')
-
+class ComunidadeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Postagem
-        fields = ['id', 'titulo', 'descricao', 'id_topico', 'id_user', 'created_at', 'updated_at']
+        model = Comunidade
+        fields = ['id', 'nome', 'users', 'created_at']
+
+class LikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Topico
+        fields = ['id', 'id_topico', 'id_user']
+
 
 class TopicoDetailSerializer(serializers.ModelSerializer):
-    postagens = PostagemSerializer(many=True, read_only=True, source='postagem_set')
+    comentarios = ComentarioSerializer(many=True, read_only=True, source='comentario_set')
 
     class Meta:
         model = Topico
-        fields = ['id', 'titulo', 'descricao', 'id_categoria', 'id_user', 'postagens', 'created_at', 'updated_at']
+        fields = ['id', 'titulo', 'descricao', 'id_categoria', 'id_user', 'comentarios', 'created_at', 'updated_at']
+
+class ComentarioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comentario
+        fields = ['id', 'id_topico', 'id_user', 'comentario', 'created_at', 'updated_at']
