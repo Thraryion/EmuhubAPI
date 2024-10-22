@@ -55,18 +55,19 @@ class Mensagem(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 #forum
+class Comunidade(models.Model):
+    nome = models.CharField(max_length=125)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class ParticipantesComunidade(models.Model):
+    id_comunidade = models.ForeignKey('Comunidade', on_delete=models.CASCADE)
+    id_user = models.ForeignKey('User', on_delete=models.CASCADE)
+
 class Topico(models.Model):
     titulo = models.CharField(max_length=125)
     descricao = models.TextField()
+    id_comunidade = models.ForeignKey('Comunidade', on_delete=models.CASCADE)
     id_categoria = models.ForeignKey('Categoria_Forum', on_delete=models.CASCADE)
-    id_user = models.ForeignKey('User', on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-class Postagem(models.Model):
-    titulo = models.CharField(max_length=125)
-    descricao = models.TextField()
-    id_topico = models.ForeignKey('Topico', on_delete=models.CASCADE)
     id_user = models.ForeignKey('User', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -75,21 +76,22 @@ class Categoria_Forum(models.Model):
     nome = models.CharField(max_length=125)
 
 class Like(models.Model):
-    id_postagem = models.ForeignKey('Postagem', on_delete=models.CASCADE)
+    id_topico = models.ForeignKey('Topico', on_delete=models.CASCADE, blank=True, null=True)
+    id_comentario = models.ForeignKey('Comentario', on_delete=models.CASCADE, blank=True, null=True)
     id_user = models.ForeignKey('User', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('id_postagem', 'id_user')
+        unique_together = ('id_topico', 'id_comentario', 'id_user')
 
 
 class Comentario(models.Model):
     descricao = models.TextField()
-    id_postagem = models.ForeignKey('Postagem', on_delete=models.CASCADE)
+    id_topico = models.ForeignKey('Topico', on_delete=models.CASCADE)
     id_user = models.ForeignKey('User', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     id_parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
 
     class Meta:
-        ordering = ['created_at']  # Ordenar os comentários pelo tempo de criação
+        ordering = ['created_at']
