@@ -56,23 +56,22 @@ class Roms():
             raise NotFound()
     
     def create_data(self, id_rom, title, description, emulador, categoria, image_base64, file, empresa):
-        if file is None:
-            file_name = None
-        else:
-            file = file.path
-            file_name = os.path.basename(file)
+    file_name = None
+    if file and hasattr(file, 'path'):
+        file_name = os.path.basename(file.path)
 
-        rom = {
-            'id': id_rom,
-            'title': title,
-            'description': description,
-            'emulador': emulador,
-            'categoria': categoria,
-            'empresa': empresa,
-            'image_base64': image_base64,
-            'file': file_name,
-        }
-        return rom
+    rom = {
+        'id': id_rom,
+        'title': title,
+        'description': description,
+        'emulador': emulador,
+        'categoria': categoria,
+        'empresa': empresa,
+        'image_base64': image_base64,
+        'file': file_name,
+    }
+    return rom
+
 
     def download(file_path):
             try:
