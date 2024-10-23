@@ -44,6 +44,7 @@ class Roms():
     def most_played(self):
         roms = ROM.objects.order_by('-qtd_download')[:4]
         data = []
+        print(roms.file)
 
         try:
             for rom in roms:
@@ -56,10 +57,15 @@ class Roms():
             raise NotFound()
     
     def create_data(self, id_rom, title, description, emulador, categoria, image_base64, file, empresa):
-        if file is not None and hasattr(file, 'path'):
-            file_name = os.path.basename(file.path)
-        elif file is None:
-            file_name = 'Nenhum arquivo disponível'
+        file_name = None
+        try:
+            if file and hasattr(file, 'path'):
+                file_name = os.path.basename(file.path)
+            else:
+                file_name = 'Nenhum arquivo disponível'
+        except ValueError as e:
+            print(f'Erro ao acessar o arquivo para ROM ID {id_rom}: {e}')
+            file_name = 'Erro ao acessar o arquivo'
 
         rom = {
             'id': id_rom,
@@ -72,7 +78,6 @@ class Roms():
             'file': file_name,
         }
         return rom
-
 
     def download(file_path):
             try:
