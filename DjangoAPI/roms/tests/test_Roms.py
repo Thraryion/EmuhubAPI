@@ -48,8 +48,8 @@ class RomsTests(APITestCase):
         data = {
             'title': 'Test ROM 2',
             'description': 'Test ROM description 2',
-            'categoria': 1,
-            'emulador': 1,
+            'id_categoria': 1,
+            'id_emulador': 1,
         }
         response = self.client.post(url, data, HTTP_AUTHORIZATION=f'Token {token}')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -67,8 +67,8 @@ class RomsTests(APITestCase):
         data = {
             'title': 'Test ROM Updated',
             'description': 'Test ROM description Updated',
-            'categoria': 1,
-            'emulador': 1,
+            'id_categoria': 1,
+            'id_emulador': 1,
         }
         response = self.client.put(url, data, HTTP_AUTHORIZATION=f'Token {token}')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
