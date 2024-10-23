@@ -61,17 +61,17 @@ class Roms():
         elif file is None:
             file_name = 'Nenhum arquivo disponível'
 
-    rom = {
-        'id': id_rom,
-        'title': title,
-        'description': description,
-        'emulador': emulador,
-        'categoria': categoria,
-        'empresa': empresa,
-        'image_base64': image_base64,
-        'file': file_name,
-    }
-    return rom
+        rom = {
+            'id': id_rom,
+            'title': title,
+            'description': description,
+            'emulador': emulador,
+            'categoria': categoria,
+            'empresa': empresa,
+            'image_base64': image_base64,
+            'file': file_name,
+        }
+        return rom
 
 
     def download(file_path):
