@@ -20,8 +20,8 @@ from .Classes.wishlist import Wishlist
 from .Classes.Roms import Roms
 from .Classes.Auth import Auth
 from .Classes.token import Token
-from .models import ROM, User, Emulador, Categoria_Jogo
-from .serializer import ROMSerializer, UserSerializer, EmuladorSerializer, CategoriaJogoSerializer
+from .models import ROM, User, Emulador, Categoria_Jogo, Topico, CategoriaForum, Comentario, LikeComentario, LikeTopico
+from .serializer import ROMSerializer, UserSerializer, EmuladorSerializer, CategoriaJogoSerializer, TopicoDetailSerializer, ComentarioSerializer, LikeTopicoSerializer, LikeComentarioSerializer
 
 import base64
 import logging
@@ -324,4 +324,25 @@ class Categorias(APIView):
     def get(self, request):
         categorias = Categoria_Jogo.objects.all()
         serializer = CategoriaJogoSerializer(categorias, many=True)
+        return Response(serializer.data)
+
+
+# Views de Forum
+
+class CreateTopico(APIView):
+    def post(self, request):
+        # token = request.headers.get('Authorization', '').split(' ')[1]
+        # payload = Token.decode_token(token)
+        # if payload is None:
+        #     return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+        serializer = TopicoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ListTopicos(APIView):
+    def get(self, request):
+        topicos = Topico.objects.all()
+        serializer = TopicoSerializer(topicos, many=True)
         return Response(serializer.data)
