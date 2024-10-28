@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
             'password': {'write_only': True},
             'admin': {'required': False},
         }
-    
+
     def validate(self, data):
         if User.objects.filter(username=data['username']).exists():
             raise serializers.ValidationError({"username": "Este nome de usuário já está em uso."})
@@ -73,6 +73,10 @@ class ConversaDetailSerializer(serializers.ModelSerializer):
         fields = ['id', 'mensagens', 'created_at', 'updated_at']
 
 #Forum serializers
+class TopicoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Topico
+        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'id_user', 'created_at', 'updated_at']
 class LikeTopicoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topico
@@ -86,7 +90,7 @@ class LikeComentarioSerializer(serializers.ModelSerializer):
 class TopicoDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topico
-        fields = ['id', 'titulo', 'img_Topico', 'descricao', 'id_categoria', 'id_user', 'created_at', 'updated_at']
+        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'id_user', 'created_at', 'updated_at']
 
 class ComentarioSerializer(serializers.ModelSerializer):
     class Meta:

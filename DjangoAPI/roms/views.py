@@ -7,6 +7,7 @@ from django.conf import settings
 from rest_framework import status
 from rest_framework.views import APIView
 from django.contrib.auth.hashers import check_password
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.core.files.storage import default_storage
@@ -21,7 +22,7 @@ from .Classes.Roms import Roms
 from .Classes.Auth import Auth
 from .Classes.token import Token
 from .models import ROM, User, Emulador, Categoria_Jogo, Topico, CategoriaForum, Comentario, LikeComentario, LikeTopico
-from .serializer import ROMSerializer, UserSerializer, EmuladorSerializer, CategoriaJogoSerializer, TopicoDetailSerializer, ComentarioSerializer, LikeTopicoSerializer, LikeComentarioSerializer
+from .serializer import ROMSerializer, UserSerializer, EmuladorSerializer, CategoriaJogoSerializer, TopicoDetailSerializer, ComentarioSerializer, LikeTopicoSerializer, LikeComentarioSerializer, TopicoSerializer
 
 import base64
 import logging
@@ -343,6 +344,39 @@ class CreateTopico(APIView):
 
 class ListTopicos(APIView):
     def get(self, request):
-        topicos = Topico.objects.all()
-        serializer = TopicoSerializer(topicos, many=True)
-        return Response(serializer.data)
+        topicos = Topico.objects.all().order_by('-created_at')
+        paginator = PageNumberPagination()
+        paginator.page_size = 10  
+        
+        paginated_topicos = paginator.paginate_queryset(topicos, request)
+        serializer = TopicoSerializer(paginated_topicos, many=True)
+        
+        return paginator.get_paginated_response(serializer.data)
+
+class UpdateTopico(APIView):
+    def put(self, request):
+        # token = request.headers.get('Authorization', '').split(' ')[1]
+        # payload = Token.decode_token(token)
+        # if payload is None:
+        #     return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+        topico_id = request.data.get('topico_id')
+        topico = Topico.objects.get(id=topico_id)
+        serializer = TopicoSerializer(topico, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class DeleteTopico(APIView):
+    def delete(self, request):
+        # token = request.headers.get('Authorization', '').split(' ')[1]
+        # payload = Token.decode_token(token)
+        # if payload is None:
+        #     return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+        topico_id = request.data.get('topico_id')
+        try:
+            topico = Topico.objects.get(id=topico_id)
+            topico.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Topico.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
