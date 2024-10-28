@@ -76,7 +76,7 @@ class ConversaDetailSerializer(serializers.ModelSerializer):
 class TopicoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topico
-        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'id_user', 'created_at', 'updated_at']
+        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'id_user', 'tags', 'created_at', 'updated_at']
 class LikeTopicoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topico
@@ -90,7 +90,7 @@ class LikeComentarioSerializer(serializers.ModelSerializer):
 class TopicoDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topico
-        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'id_user', 'created_at', 'updated_at']
+        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'id_user', 'tags', 'created_at', 'updated_at']
 
 class ComentarioSerializer(serializers.ModelSerializer):
     class Meta:

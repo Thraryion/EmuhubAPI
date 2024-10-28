@@ -66,8 +66,12 @@ class Topico(models.Model):
     img_topico = models.ImageField(upload_to='img-topico/', blank=True, null=True)
     id_categoria = models.ForeignKey('CategoriaForum', on_delete=models.CASCADE)
     id_user = models.ForeignKey('User', on_delete=models.CASCADE)
+    tags = models.ManyToManyField('Tags', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+class Tags(models.Model):
+    nome = models.CharField(max_length=125)
 
 class CategoriaForum(models.Model):
     nome = models.CharField(max_length=125)
