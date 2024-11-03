@@ -50,7 +50,12 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "corsheaders",
     "rest_framework",
-    "roms"
+    "roms",
+    "users",
+    "forum",
+    "mensagens",
+    "notificacoes", 
+    "emuladores"
 ]
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '52.45.165.140']
