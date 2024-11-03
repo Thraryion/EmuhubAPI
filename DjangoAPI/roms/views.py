@@ -112,7 +112,7 @@ class ROMDownload(APIView):
         empresa = empresa.lower()
         emulador_name = emulador_name.lower()
 
-        emulador = Emulador.objects.get(nome=emulador_name, empresa=empresa)
+        emulador = Emulador.objects.get(nome__iexact=emulador_name, empresa__iexact=empresa)
         obj = ROM.objects.get(emulador_id=emulador.id, title=game_name)
         file_path = obj.file.path
         
