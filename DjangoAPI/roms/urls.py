@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ROMDelete, ROMCreate, ROMListView, ROMUpdate, ROMDownload, UserRegister, UserViewWishlist, UserAddWishlist, UserDelete, UserListView, UserRemoveWishlist, UserUpdate, RefreshToken, Login, MostPlayed ,ROMDetailView, UserDetailView, ROMSearch, ForgotPassword, ResetPassword, ProtectedRoute, Emuladores, Categorias, EmuladorCreate, EmuladorUpdate, EmuladorDelete, EmuladorDownload
+from .views import ROMDelete, ROMCreate, ROMListView, ROMUpdate, ROMDownload, UserRegister, UserViewWishlist, UserAddWishlist, UserDelete, UserListView, UserRemoveWishlist, UserUpdate, RefreshToken, Login, MostPlayed ,ROMDetailView, UserDetailView, ROMSearch, ForgotPassword, ResetPassword, ProtectedRoute, Emuladores, Categorias, EmuladorCreate, EmuladorUpdate, EmuladorDelete, EmuladorDownload, CreateTopico, UpdateTopico, ListTopicos, DeleteTopico
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -31,4 +31,8 @@ urlpatterns = [
     path("emulador/delete/", EmuladorDelete.as_view(), name="emulador-delete"),
     path("emulador/<str:emulador_name>/download/", EmuladorDownload.as_view(), name="emulador-download"),
     path("categorias/", Categorias.as_view(), name="categorias")
+    path("topicos/create/", CreateTopico.as_view(), name="topico-create"),
+    path("topicos/update/", UpdateTopico.as_view(), name="topico-update"),
+    path("topicos/list/", ListTopicos.as_view(), name="topico-list"),
+    path("topicos/delete/", DeleteTopico.as_view(), name="topico-delete")
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

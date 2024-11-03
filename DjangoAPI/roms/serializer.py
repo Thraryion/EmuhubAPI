@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ROM, User, Conversa, ParticipantesCoversa, Mensagem, Topico, Emulador, Categoria_Jogo, Comunidade, Comentario, LikeComentario, LikeTopico
+from .models import ROM, User, Conversa, ParticipantesCoversa, Mensagem, Topico, Emulador, Categoria_Jogo, Comentario, LikeComentario, LikeTopico, CategoriaForum
 
 
 #rom serializer
@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
             'password': {'write_only': True},
             'admin': {'required': False},
         }
-    
+
     def validate(self, data):
         if User.objects.filter(username=data['username']).exists():
             raise serializers.ValidationError({"username": "Este nome de usuário já está em uso."})
@@ -73,21 +73,24 @@ class ConversaDetailSerializer(serializers.ModelSerializer):
         fields = ['id', 'mensagens', 'created_at', 'updated_at']
 
 #Forum serializers
-class ComunidadeSerializer(serializers.ModelSerializer):
+class TopicoSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Comunidade
-        fields = ['id', 'nome', 'users', 'created_at']
-
-class LikeSerializer(serializers.ModelSerializer):
+        model = Topico
+        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'id_user', 'tags', 'created_at', 'updated_at']
+class LikeTopicoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topico
         fields = ['id', 'id_topico', 'id_user']
 
+class LikeComentarioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comentario
+        fields = ['id', 'id_comentario', 'id_user']
 
 class TopicoDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topico
-        fields = ['id', 'titulo', 'descricao', 'id_categoria', 'id_user', 'created_at', 'updated_at']
+        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'id_user', 'tags', 'created_at', 'updated_at']
 
 class ComentarioSerializer(serializers.ModelSerializer):
     class Meta:
