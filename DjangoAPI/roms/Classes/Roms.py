@@ -1,6 +1,6 @@
 from ..models import ROM, Categoria_Jogo, Emulador
 from django.core.files.storage import default_storage
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse, Http404, FileResponse
 from django.core.exceptions import ObjectDoesNotExist
 from ..serializer import ROMSerializer
 import os
