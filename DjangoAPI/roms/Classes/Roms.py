@@ -79,7 +79,7 @@ class Roms():
         }
         return rom
 
-    def download(file_path):
+    def download(self, file_path):
             try:
                 response = FileResponse(open(file_path, 'rb'), as_attachment=True)
                 return response

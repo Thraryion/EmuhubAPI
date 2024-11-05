@@ -601,6 +601,10 @@ class CreateTopico(APIView):
             )
         })
     def post(self, request):
+        # token = request.headers.get('Authorization', '').split(' ')[1]
+        # payload = Token.decode_token(token)
+        # if payload is None:
+        #     return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
         serializer = TopicoSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -646,6 +650,10 @@ class UpdateTopico(APIView):
             )
         })
     def put(self, request):
+        # token = request.headers.get('Authorization', '').split(' ')[1]
+        # payload = Token.decode_token(token)
+        # if payload is None:
+        #     return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
         topico_id = request.data.get('topico_id')
         try:
             topico = Topico.objects.get(id=topico_id)
@@ -675,6 +683,11 @@ class DeleteTopico(APIView):
             )
         })
     def delete(self, request):
+        # token = request.headers.get('Authorization', '').split(' ')[1]
+        # payload = Token.decode_token(token)
+        # if payload is None:
+        #     return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
+
         topico_id = request.data.get('topico_id')
         try:
             topico = Topico.objects.get(id=topico_id)
@@ -682,3 +695,101 @@ class DeleteTopico(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Topico.DoesNotExist:
             return Response({'error': 'Tópico não encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+class CreateComentario(APIView):
+    @swagger_auto_schema(
+        request_body=ComentarioSerializer,
+        responses={
+            201: openapi.Response(
+                description="Comentário criado com sucesso.",
+                schema=ComentarioSerializer
+            ),
+            400: openapi.Response(
+                description="Dados inválidos."
+            )
+        })
+    def post(self, request):
+        # token = request.headers.get('Authorization', '').split(' ')[1]
+        # payload = Token.decode_token(token)
+        # if payload is None:
+        #     return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
+        serializer = ComentarioSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ListComentarios(APIView):
+    @swagger_auto_schema(
+        responses={
+            200: openapi.Response(
+                description="Lista de comentários.",
+                schema=ComentarioSerializer(many=True)
+            ),
+            401: openapi.Response(
+                description="Token inválido."
+            )
+        })
+    def get(self, request):
+        comentarios = Comentario.objects.all().order_by('-created_at')
+        paginator = PageNumberPagination()
+        paginator.page_size = 10
+
+        paginated_comentarios = paginator.paginate_queryset(comentarios, request)
+        serializer = ComentarioSerializer(paginated_comentarios, many=True)
+
+        return paginator.get_paginated_response(serializer.data)
+
+class UpdateComentario(APIView):
+    @swagger_auto_schema(
+        request_body=ComentarioSerializer,
+        responses={
+            200: openapi.Response(
+                description="Comentário atualizado com sucesso.",
+                schema=ComentarioSerializer
+            ),
+            400: openapi.Response(
+                description="Dados inválidos."
+            ),
+            404: openapi.Response(
+                description="Comentário não encontrado."
+            )
+        })
+    def put(self, request):
+        # token = request.headers.get('Authorization', '').split(' ')[1]
+        # payload = Token.decode_token(token)
+        # if payload is None:
+        #     return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
+        comentario_id = request.data.get('comentario_id')
+        try:
+            comentario = Comentario.objects.get(id=comentario_id)
+            serializer = ComentarioSerializer(comentario, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Comentario.DoesNotExist:
+            return Response({'error': 'Comentário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+class DeleteComentario(APIView):
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('comentario_id', openapi.IN_QUERY, description="ID do comentário", type=openapi.TYPE_INTEGER)
+        ],
+        responses={
+            204: openapi.Response(
+                description="Comentário deletado com sucesso."
+            ),
+            400: openapi.Response(
+                description="Dados inválidos."
+            ),
+            404: openapi.Response(
+                description="Comentário não encontrado."
+            )
+        })
+    def delete(self, request):
+        # token = request.headers.get('Authorization', '').split(' ')[1]
+        # payload = Token.decode_token(token)
+        # if payload is None:
+        #     return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
+        comentario_id = request.data.get('comentario_id')
