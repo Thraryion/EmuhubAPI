@@ -177,7 +177,7 @@ class ROMDownload(APIView):
                 obj.save()
                 return response
             else:
-                return Response({'error': 'File not found'}, status=status.HTTP_404_NOT_FOUND)
+                return Response({'error': 'File não encontrado'}, status=status.HTTP_404_NOT_FOUND)
         except Emulador.DoesNotExist:
             return Response({'error': 'Emulador não encontrado'}, status=status.HTTP_404_NOT_FOUND)
         except ROM.DoesNotExist:
