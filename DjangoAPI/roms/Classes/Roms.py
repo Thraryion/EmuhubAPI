@@ -6,6 +6,7 @@ from ..serializer import ROMSerializer
 import os
 import base64
 import asyncio
+from rest_framework import status
 from rest_framework.response import Response
 from django.http import HttpResponse
 from django.http import HttpResponse
