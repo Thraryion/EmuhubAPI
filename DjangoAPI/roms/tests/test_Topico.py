@@ -71,3 +71,21 @@ class TopicoAPITests(APITestCase):
         response = self.client.delete(self.delete_url, {"topico_id": topico.id}, format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Topico.objects.filter(id=topico.id).exists())
+
+    def test_create_comentario(self):
+        topico = Topico.objects.create(
+            titulo="Tópico Para Comentar",
+            descricao="Descrição Para Comentar",
+            id_categoria=self.categoria,
+            id_user=self.user
+        )
+
+        data = {
+            "comentario": "Novo Comentário",
+            "id_topico": topico.id,
+            "id_user": self.user.id
+        }
+        response = self.client.post(reverse('comentario-create'), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["comentario"], data["comentario"])
+        self.assertEqual(response.data["id_topico"], topico.id)

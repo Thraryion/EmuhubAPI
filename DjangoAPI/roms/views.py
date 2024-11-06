@@ -50,11 +50,15 @@ class ROMListView(APIView):
     @swagger_auto_schema(
         responses={
             200: openapi.Response(description="Lista de ROMs", schema=ROMSerializer(many=True)),
-            401: "Token inválido"
+            401: "Token inválido"# Use get() para gerar a exceção corretamente
         })
     def get(self, request):
-        data = Roms.get_roms()
-        return JsonResponse(data, safe=False)
+        try:
+            data = Roms.get_roms()
+            return JsonResponse(data, safe=False)
+        except Exception as e:
+            logger.error(f"Erro ao obter lista de ROMs: {e}")
+            return Response({'error': 'Erro interno do servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class ROMDetailView(APIView):
     @swagger_auto_schema(
@@ -66,9 +70,13 @@ class ROMDetailView(APIView):
             404: "ROM não encontrado"
         })
     def get(self, request):
-        rom_id = request.GET.get('rom_id')
-        data = Roms.rom_detail(rom_id)
-        return JsonResponse(data, safe=False)
+        try:
+            rom_id = request.GET.get('rom_id')
+            data = Roms.rom_detail(rom_id)
+            return JsonResponse(data, safe=False)
+        except Exception as e:
+            logger.error(f"Erro ao obter detalhes do ROM: {e}")
+            return Response({'error': 'Erro interno do servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class ROMSearch(APIView):
     @swagger_auto_schema(
@@ -80,10 +88,13 @@ class ROMSearch(APIView):
             404: "ROM não encontrado"
         })
     def get(self, request):
-        rom_title = request.GET.get('rom_title')
-        roms = ROM.objects.filter(title__icontains=rom_title)
-        serializer = ROMSerializer(roms, many=True)
-        return Response(serializer.data)
+        try:
+            rom_title = request.GET.get('rom_title')
+            roms = ROM.objects.filter(title__icontains=rom_title)
+            serializer = ROMSerializer(roms, many=True)
+            return Response(serializer.data)
+        except ROM.DoesNotExist:
+            raise NotFound("ROM não encontrado")
 
 class ROMCreate(APIView):
     @swagger_auto_schema(
@@ -94,11 +105,21 @@ class ROMCreate(APIView):
             401: "Não autorizado"
         })
     def post(self, request):
-        serializer = ROMSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # token = request.headers.get('Authorization', '').split(' ')[1]
+        # payload = Token.decode_token(token)
+        # if payload is None:
+        #     return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+        # if payload.get('admin') is False:
+        #     return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            serializer = ROMSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Erro ao criar ROM: {e}")
+            return Response({'error': 'Erro interno do servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class ROMUpdate(APIView):
     @swagger_auto_schema(
@@ -109,12 +130,12 @@ class ROMUpdate(APIView):
             401: "Não autorizado"
         })
     def put(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if payload is None:
-            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
-        if payload.get('admin') is False:
-            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
+        # token = request.headers.get('Authorization', '').split(' ')[1]
+        # payload = Token.decode_token(token)
+        # if payload is None:
+        #     return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+        # if payload.get('admin') is False:
+        #     return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
         rom_id = request.data.get('rom_id')
         try:
             rom = ROM.objects.get(id=rom_id)
@@ -144,9 +165,9 @@ class ROMDelete(APIView):
             return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
         if payload.get('admin') is False:
             return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
-        rom_id = request.GET.get('rom_id')  # Corrigido para usar GET em vez de data
+        rom_id = request.GET.get('rom_id') 
         try:
-            ROM.objects.get(id=rom_id).delete()  # Use get() para gerar a exceção corretamente
+            ROM.objects.get(id=rom_id).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except ROM.DoesNotExist:
             return Response({'error': 'ROM não encontrado'}, status=status.HTTP_404_NOT_FOUND)
@@ -190,8 +211,12 @@ class MostPlayed(APIView):
             404: "ROM não encontrado"
         })
     def get(self, request):
-        data = Roms.most_played()
-        return JsonResponse(data, safe=False)
+        try:
+            data = Roms.most_played()
+            return JsonResponse(data, safe=False)
+        except Exception as e:
+            logger.error(f"Erro ao obter ROMs mais jogados: {e}")
+            return Response({'error': 'Erro interno do servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 #Views User
 class UserListView(APIView):
