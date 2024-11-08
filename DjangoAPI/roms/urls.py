@@ -1,5 +1,12 @@
 from django.urls import path
-from .views import ROMDelete, ROMCreate, ROMListView, ROMUpdate, ROMDownload, UserRegister, UserViewWishlist, UserAddWishlist, UserDelete, UserListView, UserRemoveWishlist, UserUpdate, RefreshToken, Login, MostPlayed ,ROMDetailView, UserDetailView, ROMSearch, ForgotPassword, ResetPassword, ProtectedRoute, Emuladores, Categorias, EmuladorCreate, EmuladorUpdate, EmuladorDelete, EmuladorDownload, CreateTopico, UpdateTopico, ListTopicos, DeleteTopico
+from .views import (
+                    ROMDelete, ROMCreate, ROMListView, ROMUpdate, ROMDownload, ROMSearch, ROMDetailView,
+                    UserRegister, UserViewWishlist, UserAddWishlist, UserDelete, UserListView, UserRemoveWishlist, 
+                    UserUpdate, UserDetailView, RefreshToken, Login, MostPlayed, ForgotPassword, ResetPassword,
+                    Emuladores, Categorias, EmuladorCreate, EmuladorUpdate, EmuladorDelete, EmuladorDownload,
+                    CreateTopico, UpdateTopico, ListTopicos, DeleteTopico, TopicoDetail,
+                    CreateComentario, UpdateComentario, ListComentarios, DeleteComentario
+                )
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -24,7 +31,6 @@ urlpatterns = [
     path("token/", Login.as_view(), name="token"),
     path("forgot-password/" , ForgotPassword.as_view(), name="forgot-password"),
     path("reset-password/", ResetPassword.as_view(), name="reset-password"),
-    path("protected/", ProtectedRoute.as_view(), name="protected"),
     path("emuladores/", Emuladores.as_view(), name="emuladores"),
     path("emulador/create/", EmuladorCreate.as_view(), name="emulador-create"),
     path("emulador/update/", EmuladorUpdate.as_view(), name="emulador-update"),
@@ -34,5 +40,10 @@ urlpatterns = [
     path("topicos/create/", CreateTopico.as_view(), name="topico-create"),
     path("topicos/update/", UpdateTopico.as_view(), name="topico-update"),
     path("topicos/list/", ListTopicos.as_view(), name="topico-list"),
-    path("topicos/delete/", DeleteTopico.as_view(), name="topico-delete")
+    path("topicos/delete/", DeleteTopico.as_view(), name="topico-delete"),
+    path("topicos/detail/", TopicoDetail.as_view(), name="topico-detail"),
+    path("comentarios/create/", CreateComentario.as_view(), name="comentario-create"),
+    path("comentarios/update/", UpdateComentario.as_view(), name="comentario-update"),
+    path("comentarios/list/", ListComentarios.as_view(), name="comentario-list"),
+    path("comentarios/delete/", DeleteComentario.as_view(), name="comentario-delete")
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
