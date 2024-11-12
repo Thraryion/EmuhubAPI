@@ -181,13 +181,19 @@ class LikeTopicoView(APIView):
             return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
         user_id = payload['user_id']
         try:
-            serializer = LikeTopicoSerializer(data=request.data)
-            serializer.initial_data['id_user'] = user_id
+            data = request.data.copy()
+            data['id_user'] = user_id
+            serializer = LikeTopicoSerializer(data=data)
+
+            if LikeTopico.objects.filter(id_user=user_id, id_topico=data['id_topico']).exists():
+                return Response({'error': 'Você já deu like nesse tópico'}, status=status.HTTP_400_BAD_REQUEST)
+                
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            print(e)
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class UnlikeTopicoView(APIView):
@@ -214,7 +220,7 @@ class UnlikeTopicoView(APIView):
             return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
         user_id = payload['user_id']
         try:
-            like = LikeTopico.objects.get(id_user=user_id, topico_id=topico_id)
+            like = LikeTopico.objects.get(id_user=user_id, id_topico=topico_id)
             like.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except LikeTopico.DoesNotExist:
