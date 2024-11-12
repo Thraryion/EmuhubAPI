@@ -189,12 +189,9 @@ class UnlikeComentarioView(APIView):
 
 class ComentarioIsHelpful(APIView):
     @swagger_auto_schema(
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'comentario_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID do comentário")
-            }
-        ),
+        manual_parameters=[
+            openapi.Parameter('comentario_id', openapi.IN_QUERY, description="ID do comentário", type=openapi.TYPE_INTEGER)
+        ],
         responses={
             200: openapi.Response(
                 description="Comentário é útil.",

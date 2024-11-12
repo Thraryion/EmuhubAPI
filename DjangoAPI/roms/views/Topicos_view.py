@@ -155,9 +155,10 @@ class TopicoDetail(APIView):
             serializer = TopicoSerializer(topico)
 
             likes = LikeTopico.objects.filter(topico_id=topico_id).count()
-            serializer.data['likes'] = likes
+            data = serializer.data
+            data['likes'] = likes
 
-            return Response(serializer.data)
+            return Response(data)
         except Topico.DoesNotExist:
             raise Http404("Tópico não encontrado")
 
