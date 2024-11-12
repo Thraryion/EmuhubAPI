@@ -87,10 +87,12 @@ class UpdateTopico(APIView):
             )
         })
     def put(self, request):
-        # token = request.headers.get('Authorization', '').split(' ')[1]
-        # payload = Token.decode_token(token)
-        # if not payload:
-        #     return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
+        token = request.headers.get('Authorization', '').split(' ')[1]
+        payload = Token.decode_token(token)
+        if not payload:
+            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
+        if payload.get('admin') is False:
+            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
         topico_id = request.data.get('topico_id')
         try:
             topico = Topico.objects.get(id=topico_id)
@@ -120,11 +122,11 @@ class DeleteTopico(APIView):
             )
         })
     def delete(self, request):
-        # token = request.headers.get('Authorization', '').split(' ')[1]
-        # payload = Token.decode_token(token)
-        # if not payload:
-        #     return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-        # user_id = payload['user_id']
+        token = request.headers.get('Authorization', '').split(' ')[1]
+        payload = Token.decode_token(token)
+        if not payload:
+            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
+        user_id = payload['user_id']
         topico_id = request.data.get('topico_id')
         try:
             topico = Topico.objects.get(id=topico_id)
@@ -153,9 +155,10 @@ class TopicoDetail(APIView):
             serializer = TopicoSerializer(topico)
 
             likes = LikeTopico.objects.filter(topico_id=topico_id).count()
-            serializer.data['likes'] = likes
+            data = serializer.data
+            data['likes'] = likes
 
-            return Response(serializer.data)
+            return Response(data)
         except Topico.DoesNotExist:
             raise Http404("Tópico não encontrado")
 
@@ -189,7 +192,9 @@ class LikeTopicoView(APIView):
 
 class UnlikeTopicoView(APIView):
     @swagger_auto_schema(
-        request_body=LikeTopicoSerializer,
+        manual_parameters=[
+            openapi.Parameter('topico_id', openapi.IN_QUERY, description="ID do tópico", type=openapi.TYPE_INTEGER)
+        ],
         responses={
             204: openapi.Response(
                 description="Like removido com sucesso."
@@ -202,7 +207,7 @@ class UnlikeTopicoView(APIView):
             )
         })
     def delete(self, request):
-        topico_id = request.data.get('topico_id')
+        topico_id = request.GET.get('topico_id')
         token = request.headers.get('Authorization', '').split(' ')[1]
         payload = Token.decode_token(token)
         if not payload:

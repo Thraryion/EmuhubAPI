@@ -80,12 +80,12 @@ class TopicoSerializer(serializers.ModelSerializer):
         
 class LikeTopicoSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Topico
+        model = LikeTopico
         fields = ['id', 'id_topico', 'id_user']
 
 class LikeComentarioSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Comentario
+        model = LikeComentario
         fields = ['id', 'id_comentario', 'id_user']
 
 class TopicoDetailSerializer(serializers.ModelSerializer):
@@ -96,4 +96,4 @@ class TopicoDetailSerializer(serializers.ModelSerializer):
 class ComentarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comentario
-        fields = ['id', 'id_topico', 'id_user', 'comentario', 'created_at', 'updated_at']
+        fields = ['id', 'id_topico', 'id_user', 'descricao', 'created_at', 'updated_at']
