@@ -42,7 +42,7 @@ class EmuladorCreate(APIView):
         user_id = payload.get('user_id')
         data = request.data.copy()
         data['user_id'] = user_id
-        
+
         if payload.get('admin') is False:
             return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -70,7 +70,7 @@ class EmuladorUpdate(APIView):
         if payload.get('admin') is False:
             return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
 
-        emulador_id = request.data.get('emulador_id')
+        emulador_id = request.data.get('id')
         emulador = get_object_or_404(Emulador, id=emulador_id)
         serializer = EmuladorSerializer(emulador, data=request.data)
         if serializer.is_valid():
