@@ -39,6 +39,10 @@ class EmuladorCreate(APIView):
         payload = Token.decode_token(token)
         if payload is None:
             return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+        user_id = payload.get('user_id')
+        data = request.data.copy()
+        data['user_id'] = user_id
+        
         if payload.get('admin') is False:
             return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
 

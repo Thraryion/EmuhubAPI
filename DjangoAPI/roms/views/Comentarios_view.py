@@ -27,7 +27,14 @@ class CreateComentario(APIView):
             )
         })
     def post(self, request):
-        serializer = ComentarioSerializer(data=request.data)
+        token = request.headers.get('Authorization')
+        payload = Token.decode(token)
+        if not payload:
+            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
+        user_id = payload['user_id']
+        data = request.data.copy()
+        data['id_user'] = user_id
+        serializer = ComentarioSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -83,9 +90,12 @@ class UpdateComentario(APIView):
 
 class DeleteComentario(APIView):
     @swagger_auto_schema(
-        manual_parameters=[
-            openapi.Parameter('comentario_id', openapi.IN_QUERY, description="ID do comentário", type=openapi.TYPE_INTEGER)
-        ],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'comentario_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID do comentário")
+            }
+        ),
         responses={
             204: openapi.Response(
                 description="Comentário deletado com sucesso."
@@ -108,9 +118,12 @@ class DeleteComentario(APIView):
 
 class LikeComentarioView(APIView):
     @swagger_auto_schema(
-        manual_parameters=[
-            openapi.Parameter('comentario_id', openapi.IN_QUERY, description="ID do comentário", type=openapi.TYPE_INTEGER)
-        ],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'comentario_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID do comentário")
+            }
+        ),
         responses={
             200: openapi.Response(
                 description="Like adicionado com sucesso.",
@@ -128,7 +141,7 @@ class LikeComentarioView(APIView):
         payload = Token.decode_token(token)
         if not payload:
             return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-        user_id = Token['user_id']
+        user_id = payload['user_id']
         comentario_id = request.data.get('comentario_id')
         try:
             serializer = LikeComentarioSerializer(data=request.data)
@@ -142,9 +155,12 @@ class LikeComentarioView(APIView):
 
 class UnlikeComentarioView(APIView):
     @swagger_auto_schema(
-        manual_parameters=[
-            openapi.Parameter('comentario_id', openapi.IN_QUERY, description="ID do comentário", type=openapi.TYPE_INTEGER)
-        ],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'comentario_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID do comentário")
+            }
+        ),
         responses={
             200: openapi.Response(
                 description="Like removido com sucesso.",
@@ -162,7 +178,7 @@ class UnlikeComentarioView(APIView):
         payload = Token.decode_token(token)
         if not payload:
             return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-        user_id = Token['user_id']
+        user_id = payload['user_id']
         comentario_id = request.data.get('comentario_id')
         try:
             like = LikeComentario.objects.get(id_user=user_id, id_comentario=comentario_id)
@@ -173,9 +189,12 @@ class UnlikeComentarioView(APIView):
 
 class ComentarioIsHelpful(APIView):
     @swagger_auto_schema(
-        manual_parameters=[
-            openapi.Parameter('comentario_id', openapi.IN_QUERY, description="ID do comentário", type=openapi.TYPE_INTEGER)
-        ],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'comentario_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID do comentário")
+            }
+        ),
         responses={
             200: openapi.Response(
                 description="Comentário é útil.",

@@ -86,3 +86,21 @@ class TopicoAPITests(APITestCase):
         response = self.client.delete(self.delete_url, {"topico_id": topico.id}, HTTP_AUTHORIZATION=f'Bearer {self.token}')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Topico.objects.filter(id=topico.id).exists())
+
+    def test_like_topico(self):
+        url = reverse('topico-like')
+        data = {"topico_id": self.topico.id}
+
+        response = self.client.post(url, data, HTTP_AUTHORIZATION=f'Bearer {self.token}')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(LikeTopico.objects.filter(id_topico=topico.id, id_user=self.user).exists())
+
+    def test_unlike_topico(self):
+        url = reverse('topico-unlike')
+        data = {"topico_id": self.topico.id}
+
+        response = self.client.post(url, data, HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(LikeTopico.objects.filter(id_topico=topico.id, id_user=self.user).exists())
