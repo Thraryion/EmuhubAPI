@@ -7,8 +7,11 @@ from django.shortcuts import get_object_or_404
 
 from ..Classes.wishlist import Wishlist
 from ..Classes.Roms import Roms
+from ..Classes.token import Token
 from ..models import Emulador, Categoria_Jogo
 from ..serializer import EmuladorSerializer, CategoriaJogoSerializer
+
+Token = Token()
 
 class Emuladores(APIView):
     @swagger_auto_schema(
@@ -32,6 +35,13 @@ class EmuladorCreate(APIView):
         }
     )
     def post(self, request):
+        token = request.headers.get('Authorization', '').split(' ')[1]
+        payload = Token.decode_token(token)
+        if payload is None:
+            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+        if payload.get('admin') is False:
+            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
+
         serializer = EmuladorSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -49,6 +59,13 @@ class EmuladorUpdate(APIView):
         }
     )
     def put(self, request):
+        token = request.headers.get('Authorization', '').split(' ')[1]
+        payload = Token.decode_token(token)
+        if payload is None:
+            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+        if payload.get('admin') is False:
+            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
+
         emulador_id = request.data.get('emulador_id')
         emulador = get_object_or_404(Emulador, id=emulador_id)
         serializer = EmuladorSerializer(emulador, data=request.data)
@@ -70,6 +87,13 @@ class EmuladorDelete(APIView):
         }
     )
     def delete(self, request):
+        token = request.headers.get('Authorization', '').split(' ')[1]
+        payload = Token.decode_token(token)
+        if payload is None:
+            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+        if payload.get('admin') is False:
+            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
+
         emulador_id = request.data.get('emulador_id')
         try:
             emulador = Emulador.objects.get(id=emulador_id)

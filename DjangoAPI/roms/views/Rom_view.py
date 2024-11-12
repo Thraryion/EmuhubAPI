@@ -82,12 +82,12 @@ class ROMCreate(APIView):
             401: "Não autorizado"
         })
     def post(self, request):
-        # token = request.headers.get('Authorization', '').split(' ')[1]
-        # payload = Token.decode_token(token)
-        # if payload is None:
-        #     return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
-        # if payload.get('admin') is False:
-        #     return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
+        token = request.headers.get('Authorization', '').split(' ')[1]
+        payload = Token.decode_token(token)
+        if payload is None:
+            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+        if payload.get('admin') is False:
+            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
         try:
             serializer = ROMSerializer(data=request.data)
             if serializer.is_valid():
@@ -107,12 +107,12 @@ class ROMUpdate(APIView):
             401: "Não autorizado"
         })
     def put(self, request):
-        # token = request.headers.get('Authorization', '').split(' ')[1]
-        # payload = Token.decode_token(token)
-        # if payload is None:
-        #     return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
-        # if payload.get('admin') is False:
-        #     return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
+        token = request.headers.get('Authorization', '').split(' ')[1]
+        payload = Token.decode_token(token)
+        if payload is None:
+            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+        if payload.get('admin') is False:
+            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
         rom_id = request.data.get('rom_id')
         try:
             rom = ROM.objects.get(id=rom_id)

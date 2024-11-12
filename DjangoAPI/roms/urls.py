@@ -4,8 +4,8 @@ from .views import (
                     UserRegister, UserViewWishlist, UserAddWishlist, UserDelete, UserListView, UserRemoveWishlist, 
                     UserUpdate, UserDetailView, RefreshToken, Login, MostPlayed, ForgotPassword, ResetPassword,
                     Emuladores, Categorias, EmuladorCreate, EmuladorUpdate, EmuladorDelete, EmuladorDownload,
-                    CreateTopico, UpdateTopico, ListTopicos, DeleteTopico, TopicoDetail,
-                    CreateComentario, UpdateComentario, ListComentarios, DeleteComentario
+                    CreateTopico, UpdateTopico, ListTopicos, DeleteTopico, TopicoDetail, LikeTopicoView, UnlikeTopicoView,
+                    CreateComentario, UpdateComentario, ListComentarios, DeleteComentario, ComentarioIsHelpful, LikeComentarioView, UnlikeComentarioView
                 )
 from django.conf.urls.static import static
 from django.conf import settings
@@ -45,5 +45,10 @@ urlpatterns = [
     path("comentarios/create/", CreateComentario.as_view(), name="comentario-create"),
     path("comentarios/update/", UpdateComentario.as_view(), name="comentario-update"),
     path("comentarios/list/", ListComentarios.as_view(), name="comentario-list"),
-    path("comentarios/delete/", DeleteComentario.as_view(), name="comentario-delete")
+    path("comentarios/delete/", DeleteComentario.as_view(), name="comentario-delete"),
+    path("topicos/like/", LikeTopicoView.as_view(), name="topico-like"),
+    path("topicos/unlike/", UnlikeTopicoView.as_view(), name="topico-unlike"),
+    path("comentarios/like/", LikeComentarioView.as_view(), name="comentario-like"),
+    path("comentarios/unlike/", UnlikeComentarioView.as_view(), name="comentario-unlike"),
+    path("comentarios/is-helpful/", ComentarioIsHelpful.as_view(), name="comentario-is-helpful"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

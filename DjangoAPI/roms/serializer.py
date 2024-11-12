@@ -40,7 +40,7 @@ class UserSerializer(serializers.ModelSerializer):
 class EmuladorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Emulador
-        fields = ['id', 'nome', 'console', 'empresa']
+        fields = ['id', 'nome', 'console', 'empresa', 'emu_file']
 
 class CategoriaJogoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -77,6 +77,7 @@ class TopicoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topico
         fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'id_user', 'tags', 'created_at', 'updated_at']
+        
 class LikeTopicoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topico

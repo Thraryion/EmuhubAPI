@@ -1,5 +1,7 @@
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 class User(models.Model):
@@ -10,6 +12,7 @@ class User(models.Model):
     imagem_perfil = models.ImageField(upload_to='img-perfil/')
     wishlist = models.ManyToManyField('ROM', related_name='wishlist', blank=True)
     is_active = models.BooleanField(default=True)
+    is_banned = models.BooleanField(default=False)
     notify_comments = models.BooleanField(default=True)
     notify_likes = models.BooleanField(default=True)
     notify_messages = models.BooleanField(default=True) 
@@ -114,8 +117,10 @@ class Notificacao(models.Model):
 
 class Denuncia(models.Model):
     reported_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='reports')
-    content_id = models.IntegerField()
-    content_type = models.CharField(max_length=50) 
+    
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    content_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'content_id')    
     reason = models.TextField()
     status = models.CharField(max_length=20, default='pendente')
     reviewed_by = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_reports')
