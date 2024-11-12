@@ -40,7 +40,7 @@ class UserSerializer(serializers.ModelSerializer):
 class EmuladorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Emulador
-        fields = ['id', 'nome', 'console', 'empresa']
+        fields = ['id', 'nome', 'console', 'empresa', 'emu_file']
 
 class CategoriaJogoSerializer(serializers.ModelSerializer):
     class Meta:

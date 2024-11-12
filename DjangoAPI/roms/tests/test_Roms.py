@@ -77,9 +77,8 @@ class RomsTests(APITestCase):
 
     def test_delete_rom(self):
         token = self._generate_token()
-        url = reverse('rom-delete')
-        data = {'rom_id': self.rom.id}
-        response = self.client.delete(url, data, HTTP_AUTHORIZATION=f'Token {token}')
+        url = reverse('rom-delete') + f'?rom_id={self.rom.id}'
+        response = self.client.delete(url, HTTP_AUTHORIZATION=f'Token {token}')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(ROM.objects.count(), 0)
 

@@ -5,7 +5,7 @@ from .views import (
                     UserUpdate, UserDetailView, RefreshToken, Login, MostPlayed, ForgotPassword, ResetPassword,
                     Emuladores, Categorias, EmuladorCreate, EmuladorUpdate, EmuladorDelete, EmuladorDownload,
                     CreateTopico, UpdateTopico, ListTopicos, DeleteTopico, TopicoDetail, LikeTopicoView, UnlikeTopicoView,
-                    CreateComentario, UpdateComentario, ListComentarios, DeleteComentario
+                    CreateComentario, UpdateComentario, ListComentarios, DeleteComentario, ComentarioIsHelpful, LikeComentarioView, UnlikeComentarioView
                 )
 from django.conf.urls.static import static
 from django.conf import settings
@@ -48,4 +48,7 @@ urlpatterns = [
     path("comentarios/delete/", DeleteComentario.as_view(), name="comentario-delete"),
     path("topicos/like/", LikeTopicoView.as_view(), name="topico-like"),
     path("topicos/unlike/", UnlikeTopicoView.as_view(), name="topico-unlike"),
+    path("comentarios/like/", LikeComentarioView.as_view(), name="comentario-like"),
+    path("comentarios/unlike/", UnlikeComentarioView.as_view(), name="comentario-unlike"),
+    path("comentarios/is-helpful/", ComentarioIsHelpful.as_view(), name="comentario-is-helpful"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

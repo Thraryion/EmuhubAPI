@@ -35,8 +35,9 @@ class CreateTopico(APIView):
             return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
         user_id = payload['user_id']
 
-        serializer = TopicoSerializer(data=request.data)
-        serializer.initial_data['user_id'] = user_id
+        data = request.data.copy()
+        data['id_user'] = user_id
+        serializer = TopicoSerializer(data=data)
 
         if serializer.is_valid():
             serializer.save()
@@ -61,7 +62,7 @@ class ListTopicos(APIView):
         paginator.page_size = 10
 
         for topico in topicos:
-            likes = LikeTopico.objects.filter(topico_id=topico.topico_id)
+            likes = LikeTopico.objects.filter(id_topico=topico.id)
             topico.likes = likes.count()
         
         paginated_topicos = paginator.paginate_queryset(topicos, request)
@@ -176,13 +177,15 @@ class LikeTopicoView(APIView):
         if not payload:
             return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
         user_id = payload['user_id']
-
-        serializer = LikeTopicoSerializer(data=request.data)
-        serializer.initial_data['user_id'] = user_id
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            serializer = LikeTopicoSerializer(data=request.data)
+            serializer.initial_data['id_user'] = user_id
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class UnlikeTopicoView(APIView):
     @swagger_auto_schema(
@@ -206,7 +209,7 @@ class UnlikeTopicoView(APIView):
             return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
         user_id = payload['user_id']
         try:
-            like = LikeTopico.objects.get(user_id=user_id, topico_id=topico_id)
+            like = LikeTopico.objects.get(id_user=user_id, topico_id=topico_id)
             like.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except LikeTopico.DoesNotExist:

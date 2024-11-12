@@ -26,6 +26,7 @@ class AuthTests(APITestCase):
         url = reverse('token')
         data = {'email': 'test@example.com', 'password': 'wrongpassword'}
         response = self.client.post(url, data)
+        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertIn('error', response.data)
 
