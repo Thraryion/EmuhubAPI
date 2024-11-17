@@ -27,8 +27,8 @@ class CreateComentario(APIView):
             )
         })
     def post(self, request):
-        token = request.headers.get('Authorization')
-        payload = Token.decode(token)
+        token = request.headers.get('Authorization', '').split(' ')[1]
+        payload = Token.decode_token(token)
         if not payload:
             return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
         user_id = payload['user_id']
@@ -77,10 +77,17 @@ class UpdateComentario(APIView):
             )
         })
     def put(self, request):
-        comentario_id = request.data.get('comentario_id')
+        token = request.headers.get('Authorization', '').split(' ')[1]
+        payload = Token.decode_token(token)
+        if not payload:
+            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
+        comentario_id = request.data.get('id')
+        user_id = payload['user_id']
+        data = request.data.copy()
+        data['id_user'] = user_id
         try:
             comentario = Comentario.objects.get(id=comentario_id)
-            serializer = ComentarioSerializer(comentario, data=request.data)
+            serializer = ComentarioSerializer(comentario, data=data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data)
@@ -93,7 +100,7 @@ class DeleteComentario(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'comentario_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID do comentário")
+                'id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID do comentário")
             }
         ),
         responses={
@@ -108,7 +115,7 @@ class DeleteComentario(APIView):
             )
         })
     def delete(self, request):
-        comentario_id = request.data.get('comentario_id')
+        comentario_id = request.data.get('id')
         try:
             comentario = Comentario.objects.get(id=comentario_id)
             comentario.delete()
@@ -137,15 +144,16 @@ class LikeComentarioView(APIView):
             )
         })
     def post(self, request):
-        token = request.headers.get('Authorization')
+        comentario_id = request.data.get('comentario_id')
+        token = request.headers.get('Authorization', '').split(' ')[1]
         payload = Token.decode_token(token)
         if not payload:
             return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
         user_id = payload['user_id']
-        comentario_id = request.data.get('comentario_id')
+        data = request.data.copy()
+        data['id_user'] = user_id
         try:
-            serializer = LikeComentarioSerializer(data=request.data)
-            serializer.initial_data['id_user'] = user_id
+            serializer = LikeComentarioSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -158,7 +166,7 @@ class UnlikeComentarioView(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'comentario_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID do comentário")
+                'id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID do comentário")
             }
         ),
         responses={
@@ -174,12 +182,12 @@ class UnlikeComentarioView(APIView):
             )
         })
     def delete(self, request):
-        token = request.headers.get('Authorization')
+        token = request.headers.get('Authorization').split(' ')[1]
         payload = Token.decode_token(token)
         if not payload:
             return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
         user_id = payload['user_id']
-        comentario_id = request.data.get('comentario_id')
+        comentario_id = request.data.get('id')
         try:
             like = LikeComentario.objects.get(id_user=user_id, id_comentario=comentario_id)
             like.delete()
@@ -190,7 +198,7 @@ class UnlikeComentarioView(APIView):
 class ComentarioIsHelpful(APIView):
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter('comentario_id', openapi.IN_QUERY, description="ID do comentário", type=openapi.TYPE_INTEGER)
+            openapi.Parameter('id', openapi.IN_QUERY, description="ID do comentário", type=openapi.TYPE_INTEGER)
         ],
         responses={
             200: openapi.Response(
@@ -204,8 +212,8 @@ class ComentarioIsHelpful(APIView):
                 description="Comentário não encontrado."
             )
         })
-    def get(self, request):
-        comentario_id = request.data.get('comentario_id')
+    def post(self, request):
+        comentario_id = request.data.get('id')
         try:
             comentario = Comentario.objects.get(id=comentario_id)
             comentario.is_helpful = True

@@ -14,17 +14,22 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'email', 'password', 'admin']
         extra_kwargs = {
-            'password': {'write_only': True},
+            'password': {'write_only': True, 'required': False},
             'admin': {'required': False},
+            'username': {'required': False},
+            'email': {'required': False},
         }
 
     def validate(self, data):
-        if User.objects.filter(username=data['username']).exists():
+        username = data.get('username')
+        email = data.get('email')
+
+        if username and User.objects.filter(username=username).exists():
             raise serializers.ValidationError({"username": "Este nome de usuário já está em uso."})
-        
-        if User.objects.filter(email=data['email']).exists():
+
+        if email and User.objects.filter(email=email).exists():
             raise serializers.ValidationError({"email": "Este email já está em uso."})
-        
+
         return data
 
     def create(self, validated_data):
@@ -36,6 +41,20 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+    def update(self, instance, validated_data):
+        if 'username' in validated_data:
+            instance.username = validated_data['username']
+        if 'email' in validated_data:
+            instance.email = validated_data['email']
+        if 'admin' in validated_data:
+            instance.admin = validated_data['admin']
+        if 'password' in validated_data:
+            instance.set_password(validated_data['password'])
+
+        instance.save()
+        return instance
+
 
 class EmuladorSerializer(serializers.ModelSerializer):
     class Meta:

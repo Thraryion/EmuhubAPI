@@ -85,18 +85,21 @@ class UserUpdate(APIView):
             return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
 
         user_id = payload.get('user_id')
-        if user_id:
-            try:
-                user = User.objects.get(id=user_id)
-                serializer = UserSerializer(user, data=request.data)
-                if serializer.is_valid():
-                    serializer.save()
-                    return Response(serializer.data)
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            except User.DoesNotExist:
-                return Response({'error': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
-        return Response({'error': 'ID do usuário não fornecido'}, status=status.HTTP_400_BAD_REQUEST)
+        if not user_id:
+            return Response({'error': 'ID do usuário não fornecido'}, status=status.HTTP_400_BAD_REQUEST)
 
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({'error': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
 class UserDelete(APIView):
     @swagger_auto_schema(
         manual_parameters=[
