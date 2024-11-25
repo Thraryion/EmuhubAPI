@@ -88,9 +88,20 @@ class ConversaDetailSerializer(serializers.ModelSerializer):
 
 #Forum serializers
 class TopicoSerializer(serializers.ModelSerializer):
+    has_liked = serializers.SerializerMethodField()
+
     class Meta:
         model = Topico
-        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'id_user', 'tags', 'created_at', 'updated_at']
+        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'id_user', 'tags', 'created_at', 'updated_at', 'has_liked']
+
+    def get_has_liked(self, obj):
+        id_user = self.context['request'].user.id if self.context.get('request') else None
+        
+        if id_user is None:
+            return False
+        else:
+            return LikeTopico.objects.filter(id_topico=obj.id, id_user=id_user).exists()
+
         
 class LikeTopicoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -103,11 +114,31 @@ class LikeComentarioSerializer(serializers.ModelSerializer):
         fields = ['id', 'id_comentario', 'id_user']
 
 class TopicoDetailSerializer(serializers.ModelSerializer):
+    has_liked = serializers.SerializerMethodField()
+
     class Meta:
         model = Topico
-        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'id_user', 'tags', 'created_at', 'updated_at']
+        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'id_user', 'tags', 'created_at', 'updated_at', "has_liked"]
+
+    def get_has_liked(self, obj):
+            id_user = self.context['request'].user.id if self.context.get('request') else None
+            
+            if id_user is None:
+                return False
+            else:
+                return LikeTopico.objects.filter(id_topico=obj.id, id_user=id_user).exists()
 
 class ComentarioSerializer(serializers.ModelSerializer):
+    has_liked = serializers.SerializerMethodField()
+
     class Meta:
         model = Comentario
-        fields = ['id', 'id_topico', 'id_user', 'descricao', 'created_at', 'updated_at']
+        fields = ['id', 'id_topico', 'id_user', 'descricao', 'created_at', 'updated_at', 'has_liked']
+
+    def get_has_liked(self, obj):
+            id_user = self.context['request'].user.id if self.context.get('request') else None
+            
+            if id_user is None:
+                return False
+            else:
+                return LikeComentario.objects.filter(id_comentario=obj.id, id_user=id_user).exists()

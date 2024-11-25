@@ -59,6 +59,12 @@ class ComentarioTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Comentario.objects.count(), 0)
 
+    def test_list_comentario(self):
+        url = reverse('comentario-list') + f'?id_topico={self.topico.id}&id_user={self.user.id}'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+
     def test_like_comentario(self):
         url = reverse('comentario-like')
         data = {

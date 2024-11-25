@@ -52,11 +52,10 @@ class ListComentarios(APIView):
             )
         })
     def get(self, request):
-        comentarios = Comentario.objects.all().order_by('-created_at')
-        paginator = PageNumberPagination()
-        paginator.page_size = 10
-
-        paginated_comentarios = paginator.paginate_queryset(comentarios, request)
+        comentarios = Comentario.objects.all(id_topico=id_topico).order_by('-created_at')
+        for comentario in comentarios:
+            likes = LikeComentario.objects.filter(id_comentario=comentario.id)
+            comentario.likes = likes.count()
         serializer = ComentarioSerializer(paginated_comentarios, many=True)
 
         return paginator.get_paginated_response(serializer.data)
@@ -222,3 +221,4 @@ class ComentarioIsHelpful(APIView):
             return Response(serializer.data)
         except Comentario.DoesNotExist:
             return Response({'error': 'Comentário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
+            
