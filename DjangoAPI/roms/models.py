@@ -48,12 +48,10 @@ class ROM(models.Model):
 
 #mensagens privadas
 class Conversa(models.Model):
+    id_user1 = models.ForeignKey('User', on_delete=models.CASCADE, related_name='user1')
+    id_user2 = models.ForeignKey('User', on_delete=models.CASCADE, related_name='user2')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-class ParticipantesCoversa(models.Model):
-    id_conversa = models.ForeignKey('Conversa', on_delete=models.CASCADE)
-    id_user = models.ForeignKey('User', on_delete=models.CASCADE)
 
 class Mensagem(models.Model):
     id_conversa = models.ForeignKey('Conversa', on_delete=models.CASCADE)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ROM, User, Conversa, ParticipantesCoversa, Mensagem, Topico, Emulador, Categoria_Jogo, Comentario, LikeComentario, LikeTopico, CategoriaForum
+from .models import ROM, User, Conversa, Mensagem, Topico, Emulador, Categoria_Jogo, Comentario, LikeComentario, LikeTopico, CategoriaForum
 
 
 #rom serializer
@@ -74,15 +74,10 @@ class MensagemSerializer(serializers.ModelSerializer):
         model = Mensagem
         fields = ['id', 'id_conversa', 'id_user', 'mensagem', 'lida', 'created_at']
 
-class ParticipantesConversaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ParticipantesCoversa
-        fields = ['id', 'id_conversa', 'id_user']
-
 class ConversaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversa
-        fields = ['id', 'created_at', 'updated_at']
+        fields = ['id','id_user1', 'id_user2', 'created_at', 'updated_at']
 
 class ConversaDetailSerializer(serializers.ModelSerializer):
     mensagens = MensagemSerializer(many=True, read_only=True, source='mensagem_set')

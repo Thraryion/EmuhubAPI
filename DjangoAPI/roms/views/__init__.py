@@ -5,4 +5,4 @@ from .Topicos_view import CreateTopico, DeleteTopico, ListTopicos, UpdateTopico,
 from .Comentarios_view import CreateComentario, DeleteComentario, ListComentarios, UpdateComentario, LikeComentarioView, UnlikeComentarioView, ComentarioIsHelpful
 from .Auth_view import Login, RefreshToken, ForgotPassword, ResetPassword
 from .Wishlist_view import UserAddWishlist, UserRemoveWishlist, UserViewWishlist
-# from .Mensagens_view import
+from .Mensagens_view import MensagemCreate, ConversaCreate, Detail_Conversa, List_Conversas

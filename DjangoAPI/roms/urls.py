@@ -5,7 +5,8 @@ from .views import (
                     UserUpdate, UserDetailView, RefreshToken, Login, MostPlayed, ForgotPassword, ResetPassword,
                     Emuladores, Categorias, EmuladorCreate, EmuladorUpdate, EmuladorDelete, EmuladorDownload,
                     CreateTopico, UpdateTopico, ListTopicos, DeleteTopico, TopicoDetail, LikeTopicoView, UnlikeTopicoView,
-                    CreateComentario, UpdateComentario, ListComentarios, DeleteComentario, ComentarioIsHelpful, LikeComentarioView, UnlikeComentarioView
+                    CreateComentario, UpdateComentario, ListComentarios, DeleteComentario, ComentarioIsHelpful, LikeComentarioView, UnlikeComentarioView,
+                    MensagemCreate, ConversaCreate, Detail_Conversa, List_Conversas
                 )
 from django.conf.urls.static import static
 from django.conf import settings
@@ -51,4 +52,8 @@ urlpatterns = [
     path("comentarios/like/", LikeComentarioView.as_view(), name="comentario-like"),
     path("comentarios/unlike/", UnlikeComentarioView.as_view(), name="comentario-unlike"),
     path("comentarios/is-helpful/", ComentarioIsHelpful.as_view(), name="comentario-is-helpful"),
+    path("conversas/create/", ConversaCreate.as_view(), name="conversa-create"),
+    path("conversas/detail/", Detail_Conversa.as_view(), name="conversa-detail"),
+    path("conversas/list/", List_Conversas.as_view(), name="conversa-list"),
+    path("mensagens/create/", MensagemCreate.as_view(), name="mensagem-create"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
