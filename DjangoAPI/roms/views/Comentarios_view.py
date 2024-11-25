@@ -1,13 +1,14 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
+from django.shortcuts import render, get_object_or_404
 from rest_framework import status
 from django.http import Http404
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import logging
 
-from ..models import Comentario, LikeComentario
+from ..models import Comentario, LikeComentario, User
 from ..serializer import ComentarioSerializer, LikeComentarioSerializer
 from ..Classes.token import Token
 
@@ -52,13 +53,24 @@ class ListComentarios(APIView):
             )
         })
     def get(self, request):
-        comentarios = Comentario.objects.all(id_topico=id_topico).order_by('-created_at')
-        for comentario in comentarios:
-            likes = LikeComentario.objects.filter(id_comentario=comentario.id)
-            comentario.likes = likes.count()
-        serializer = ComentarioSerializer(paginated_comentarios, many=True)
+        id_topico = request.GET.get('id_topico')
+        comentarios = Comentario.objects.filter(id_topico=id_topico).order_by('-created_at')
+        serializer = ComentarioSerializer(comentarios, many=True)
 
-        return paginator.get_paginated_response(serializer.data)
+        for comentario in serializer.data:
+            user = get_object_or_404(User, id=comentario['id_user'])
+
+            comentario['username'] = user.username
+
+            if user.imagem_perfil:
+                comentario['imagem_perfil'] = user.imagem_perfil
+            else:
+                comentario['imagem_perfil'] = None
+
+            likes = LikeComentario.objects.filter(id_comentario=comentario['id'])
+            comentario['likes'] = likes.count()
+
+        return Response(serializer.data)
 
 class UpdateComentario(APIView):
     @swagger_auto_schema(

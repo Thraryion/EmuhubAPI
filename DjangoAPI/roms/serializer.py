@@ -136,8 +136,7 @@ class ComentarioSerializer(serializers.ModelSerializer):
         fields = ['id', 'id_topico', 'id_user', 'descricao', 'created_at', 'updated_at', 'has_liked']
 
     def get_has_liked(self, obj):
-            id_user = self.context['request'].user.id if self.context.get('request') else None
-            
+            id_user = self.context['request'].id_user if self.context.get('request') else None
             if id_user is None:
                 return False
             else:
