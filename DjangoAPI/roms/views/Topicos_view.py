@@ -239,3 +239,30 @@ class UnlikeTopicoView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except LikeTopico.DoesNotExist:
             return Response({'error': 'Like não encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+class list_categorias(APIView):
+    @swagger_auto_schema(
+        responses={
+            200: openapi.Response(
+                description="Lista de categorias.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'categorias': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    'nome': openapi.Schema(type=openapi.TYPE_STRING)
+                                }
+                            )
+                        )
+                    }
+                )
+            )
+        })
+    def get(self, request):
+        categorias = CategoriaForum.objects.all()
+        categorias_data = [{'id': categoria.id, 'categoria': categoria.nome} for categoria in categorias]
+        return Response({'categorias': categorias_data})

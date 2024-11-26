@@ -4,7 +4,7 @@ from .views import (
                     UserRegister, UserViewWishlist, UserAddWishlist, UserDelete, UserListView, UserRemoveWishlist, 
                     UserUpdate, UserDetailView, RefreshToken, Login, MostPlayed, ForgotPassword, ResetPassword,
                     Emuladores, Categorias, EmuladorCreate, EmuladorUpdate, EmuladorDelete, EmuladorDownload,
-                    CreateTopico, UpdateTopico, ListTopicos, DeleteTopico, TopicoDetail, LikeTopicoView, UnlikeTopicoView,
+                    CreateTopico, UpdateTopico, ListTopicos, DeleteTopico, TopicoDetail, LikeTopicoView, UnlikeTopicoView, list_categorias,
                     CreateComentario, UpdateComentario, ListComentarios, DeleteComentario, ComentarioIsHelpful, LikeComentarioView, UnlikeComentarioView,
                     MensagemCreate, ConversaCreate, Detail_Conversa, List_Conversas
                 )
@@ -43,6 +43,7 @@ urlpatterns = [
     path("topicos/list/", ListTopicos.as_view(), name="topico-list"),
     path("topicos/delete/", DeleteTopico.as_view(), name="topico-delete"),
     path("topicos/detail/", TopicoDetail.as_view(), name="topico-detail"),
+    path("topicos/categorias/", list_categorias.as_view(), name="topico-categorias"),
     path("comentarios/create/", CreateComentario.as_view(), name="comentario-create"),
     path("comentarios/update/", UpdateComentario.as_view(), name="comentario-update"),
     path("comentarios/list/", ListComentarios.as_view(), name="comentario-list"),

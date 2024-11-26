@@ -108,3 +108,8 @@ class TopicoAPITests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(LikeTopico.objects.filter(id_topico=self.topico.id, id_user=self.user).exists())
+
+    def test_list_categoria(self):
+        response = self.client.get(reverse('topico-categorias'))
+        print(response.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
