@@ -45,7 +45,7 @@ class EmuladorTests(APITestCase):
     def test_update_emulador(self):
         url = reverse('emulador-update')
         data = {
-            "emulador_id": self.emulador.id,
+            "id": self.emulador.id,
             "nome": "Teste 3",
             "console": "Teste 3",
             "empresa": "Teste post3"

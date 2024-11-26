@@ -119,14 +119,14 @@ REST_FRAMEWORK = {
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-      'default': {
-          'ENGINE': 'django.db.backends.postgresql',
-          'NAME': os.getenv('DATABASE_NAME'),
-          'USER': os.getenv('DATABASE_USER'),
-          'PASSWORD': os.getenv('DATABASE_PASSWORD'),
-          'HOST': os.getenv('DATABASE_HOST'),
-          'PORT': os.getenv('DATABASE_PORT', '5432'),
-      }
+       'default': {
+           'ENGINE': 'django.db.backends.postgresql',
+           'NAME': os.getenv('DATABASE_NAME'),
+           'USER': os.getenv('DATABASE_USER'),
+           'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+           'HOST': os.getenv('DATABASE_HOST'),
+           'PORT': os.getenv('DATABASE_PORT', '5432'),
+       }
 }
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024 * 1024
@@ -136,14 +136,13 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024 * 1024
 # DATABASES = {
 #       'default': {
 #           'ENGINE': 'django.db.backends.postgresql',
-#           'NAME': 'ProjetoLDS',
-#           'USER': 'postgres',
-#           'PASSWORD': 'admin',
+#           'NAME': 'projetolds',
+#           'USER': 'root',
+#           'PASSWORD': '123456',
 #           'HOST': 'localhost',
-#           'PORT': '5433',
+#           'PORT': '5432',
 #     }
 # }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

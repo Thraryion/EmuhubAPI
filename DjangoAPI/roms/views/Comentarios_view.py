@@ -1,13 +1,14 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
+from django.shortcuts import render, get_object_or_404
 from rest_framework import status
 from django.http import Http404
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import logging
 
-from ..models import Comentario, LikeComentario
+from ..models import Comentario, LikeComentario, User
 from ..serializer import ComentarioSerializer, LikeComentarioSerializer
 from ..Classes.token import Token
 
@@ -27,8 +28,8 @@ class CreateComentario(APIView):
             )
         })
     def post(self, request):
-        token = request.headers.get('Authorization')
-        payload = Token.decode(token)
+        token = request.headers.get('Authorization', '').split(' ')[1]
+        payload = Token.decode_token(token)
         if not payload:
             return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
         user_id = payload['user_id']
@@ -52,14 +53,24 @@ class ListComentarios(APIView):
             )
         })
     def get(self, request):
-        comentarios = Comentario.objects.all().order_by('-created_at')
-        paginator = PageNumberPagination()
-        paginator.page_size = 10
+        id_topico = request.GET.get('id_topico')
+        comentarios = Comentario.objects.filter(id_topico=id_topico).order_by('-created_at')
+        serializer = ComentarioSerializer(comentarios, many=True)
 
-        paginated_comentarios = paginator.paginate_queryset(comentarios, request)
-        serializer = ComentarioSerializer(paginated_comentarios, many=True)
+        for comentario in serializer.data:
+            user = get_object_or_404(User, id=comentario['id_user'])
 
-        return paginator.get_paginated_response(serializer.data)
+            comentario['username'] = user.username
+
+            if user.imagem_perfil:
+                comentario['imagem_perfil'] = user.imagem_perfil
+            else:
+                comentario['imagem_perfil'] = None
+
+            likes = LikeComentario.objects.filter(id_comentario=comentario['id'])
+            comentario['likes'] = likes.count()
+
+        return Response(serializer.data)
 
 class UpdateComentario(APIView):
     @swagger_auto_schema(
@@ -77,10 +88,17 @@ class UpdateComentario(APIView):
             )
         })
     def put(self, request):
-        comentario_id = request.data.get('comentario_id')
+        token = request.headers.get('Authorization', '').split(' ')[1]
+        payload = Token.decode_token(token)
+        if not payload:
+            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
+        comentario_id = request.data.get('id')
+        user_id = payload['user_id']
+        data = request.data.copy()
+        data['id_user'] = user_id
         try:
             comentario = Comentario.objects.get(id=comentario_id)
-            serializer = ComentarioSerializer(comentario, data=request.data)
+            serializer = ComentarioSerializer(comentario, data=data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data)
@@ -93,7 +111,7 @@ class DeleteComentario(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'comentario_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID do comentário")
+                'id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID do comentário")
             }
         ),
         responses={
@@ -108,7 +126,7 @@ class DeleteComentario(APIView):
             )
         })
     def delete(self, request):
-        comentario_id = request.data.get('comentario_id')
+        comentario_id = request.data.get('id')
         try:
             comentario = Comentario.objects.get(id=comentario_id)
             comentario.delete()
@@ -137,15 +155,16 @@ class LikeComentarioView(APIView):
             )
         })
     def post(self, request):
-        token = request.headers.get('Authorization')
+        comentario_id = request.data.get('comentario_id')
+        token = request.headers.get('Authorization', '').split(' ')[1]
         payload = Token.decode_token(token)
         if not payload:
             return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
         user_id = payload['user_id']
-        comentario_id = request.data.get('comentario_id')
+        data = request.data.copy()
+        data['id_user'] = user_id
         try:
-            serializer = LikeComentarioSerializer(data=request.data)
-            serializer.initial_data['id_user'] = user_id
+            serializer = LikeComentarioSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -158,7 +177,7 @@ class UnlikeComentarioView(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'comentario_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID do comentário")
+                'id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID do comentário")
             }
         ),
         responses={
@@ -174,12 +193,12 @@ class UnlikeComentarioView(APIView):
             )
         })
     def delete(self, request):
-        token = request.headers.get('Authorization')
+        token = request.headers.get('Authorization').split(' ')[1]
         payload = Token.decode_token(token)
         if not payload:
             return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
         user_id = payload['user_id']
-        comentario_id = request.data.get('comentario_id')
+        comentario_id = request.data.get('id')
         try:
             like = LikeComentario.objects.get(id_user=user_id, id_comentario=comentario_id)
             like.delete()
@@ -190,7 +209,7 @@ class UnlikeComentarioView(APIView):
 class ComentarioIsHelpful(APIView):
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter('comentario_id', openapi.IN_QUERY, description="ID do comentário", type=openapi.TYPE_INTEGER)
+            openapi.Parameter('id', openapi.IN_QUERY, description="ID do comentário", type=openapi.TYPE_INTEGER)
         ],
         responses={
             200: openapi.Response(
@@ -204,8 +223,8 @@ class ComentarioIsHelpful(APIView):
                 description="Comentário não encontrado."
             )
         })
-    def get(self, request):
-        comentario_id = request.data.get('comentario_id')
+    def post(self, request):
+        comentario_id = request.data.get('id')
         try:
             comentario = Comentario.objects.get(id=comentario_id)
             comentario.is_helpful = True
@@ -214,3 +233,4 @@ class ComentarioIsHelpful(APIView):
             return Response(serializer.data)
         except Comentario.DoesNotExist:
             return Response({'error': 'Comentário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
+            

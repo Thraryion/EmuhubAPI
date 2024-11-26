@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import Http404
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,7 +9,7 @@ from drf_yasg import openapi
 import logging
 
 from ..Classes.token import Token
-from ..models import Topico, LikeTopico
+from ..models import Topico, LikeTopico, User, CategoriaForum
 from ..serializer import TopicoSerializer, LikeTopicoSerializer
 
 logger = logging.getLogger(__name__)
@@ -47,6 +47,9 @@ class CreateTopico(APIView):
 
 class ListTopicos(APIView):
     @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('id_user', openapi.IN_QUERY, description="ID do usuário", type=openapi.TYPE_INTEGER)
+        ],
         responses={
             200: openapi.Response(
                 description="Lista de tópicos.",
@@ -58,17 +61,23 @@ class ListTopicos(APIView):
         })
     def get(self, request):
         topicos = Topico.objects.all().order_by('-created_at')
-        paginator = PageNumberPagination()
-        paginator.page_size = 10
+        
+        serializer = TopicoSerializer(topicos, many=True, context={'request': request})
 
-        for topico in topicos:
-            likes = LikeTopico.objects.filter(id_topico=topico.id)
-            topico.likes = likes.count()
+        for topico_data in serializer.data:
+            user = get_object_or_404(User, id=topico_data['id_user'])
+
+            topico_data['username'] = user.username
+            
+            if user.imagem_perfil:
+                topico_data['imagem_perfil'] = user.imagem_perfil
+            else:
+                topico_data['imagem_perfil'] = None
+
+            likes = LikeTopico.objects.filter(id_topico=topico_data['id'])
+            topico_data['likes'] = likes.count()
         
-        paginated_topicos = paginator.paginate_queryset(topicos, request)
-        serializer = TopicoSerializer(paginated_topicos, many=True)
-        
-        return paginator.get_paginated_response(serializer.data)
+        return Response(serializer.data)
 
 
 class UpdateTopico(APIView):
@@ -138,7 +147,8 @@ class DeleteTopico(APIView):
 class TopicoDetail(APIView):
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter('topico_id', openapi.IN_QUERY, description="ID do tópico", type=openapi.TYPE_INTEGER)
+            openapi.Parameter('topico_id', openapi.IN_QUERY, description="ID do tópico", type=openapi.TYPE_INTEGER),
+            openapi.Parameter('id_user', openapi.IN_QUERY, description="ID do usuário", type=openapi.TYPE_INTEGER)
         ],
         responses={
             200: openapi.Response(
@@ -152,10 +162,15 @@ class TopicoDetail(APIView):
     def get(self, request, topico_id):
         try:
             topico = Topico.objects.get(id=topico_id)
-            serializer = TopicoSerializer(topico)
+            serializer = TopicoSerializer(topico, many=True, context={'request': request})
 
+            img_perfil = User.objects.get(id=topico.id_user).img_perfil
+            username = User.objects.get(id=topico.id_user).username
             likes = LikeTopico.objects.filter(topico_id=topico_id).count()
             data = serializer.data
+
+            data['img_perfil'] = img_perfil
+            data['username'] = username
             data['likes'] = likes
 
             return Response(data)
@@ -193,7 +208,6 @@ class LikeTopicoView(APIView):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print(e)
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class UnlikeTopicoView(APIView):
@@ -225,3 +239,30 @@ class UnlikeTopicoView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except LikeTopico.DoesNotExist:
             return Response({'error': 'Like não encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+class list_categorias(APIView):
+    @swagger_auto_schema(
+        responses={
+            200: openapi.Response(
+                description="Lista de categorias.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'categorias': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    'nome': openapi.Schema(type=openapi.TYPE_STRING)
+                                }
+                            )
+                        )
+                    }
+                )
+            )
+        })
+    def get(self, request):
+        categorias = CategoriaForum.objects.all()
+        categorias_data = [{'id': categoria.id, 'categoria': categoria.nome} for categoria in categorias]
+        return Response({'categorias': categorias_data})

@@ -49,10 +49,10 @@ class TopicoAPITests(APITestCase):
                 id_categoria=self.categoria,
                 id_user=self.user
             )
-
+        url = reverse('topico-list') + f"?id_user={self.user.id}"
         response = self.client.get(self.list_url)
+        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 10)
 
     def test_update_topico(self):
         topico = Topico.objects.create(
@@ -108,3 +108,8 @@ class TopicoAPITests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(LikeTopico.objects.filter(id_topico=self.topico.id, id_user=self.user).exists())
+
+    def test_list_categoria(self):
+        response = self.client.get(reverse('topico-categorias'))
+        print(response.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

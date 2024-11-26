@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ROM, User, Conversa, ParticipantesCoversa, Mensagem, Topico, Emulador, Categoria_Jogo, Comentario, LikeComentario, LikeTopico, CategoriaForum
+from .models import ROM, User, Conversa, Mensagem, Topico, Emulador, Categoria_Jogo, Comentario, LikeComentario, LikeTopico, CategoriaForum
 
 
 #rom serializer
@@ -14,17 +14,22 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'email', 'password', 'admin']
         extra_kwargs = {
-            'password': {'write_only': True},
+            'password': {'write_only': True, 'required': False},
             'admin': {'required': False},
+            'username': {'required': False},
+            'email': {'required': False},
         }
 
     def validate(self, data):
-        if User.objects.filter(username=data['username']).exists():
+        username = data.get('username')
+        email = data.get('email')
+
+        if username and User.objects.filter(username=username).exists():
             raise serializers.ValidationError({"username": "Este nome de usuário já está em uso."})
-        
-        if User.objects.filter(email=data['email']).exists():
+
+        if email and User.objects.filter(email=email).exists():
             raise serializers.ValidationError({"email": "Este email já está em uso."})
-        
+
         return data
 
     def create(self, validated_data):
@@ -36,6 +41,20 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+    def update(self, instance, validated_data):
+        if 'username' in validated_data:
+            instance.username = validated_data['username']
+        if 'email' in validated_data:
+            instance.email = validated_data['email']
+        if 'admin' in validated_data:
+            instance.admin = validated_data['admin']
+        if 'password' in validated_data:
+            instance.set_password(validated_data['password'])
+
+        instance.save()
+        return instance
+
 
 class EmuladorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -55,15 +74,10 @@ class MensagemSerializer(serializers.ModelSerializer):
         model = Mensagem
         fields = ['id', 'id_conversa', 'id_user', 'mensagem', 'lida', 'created_at']
 
-class ParticipantesConversaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ParticipantesCoversa
-        fields = ['id', 'id_conversa', 'id_user']
-
 class ConversaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversa
-        fields = ['id', 'created_at', 'updated_at']
+        fields = ['id','id_user1', 'id_user2', 'created_at', 'updated_at']
 
 class ConversaDetailSerializer(serializers.ModelSerializer):
     mensagens = MensagemSerializer(many=True, read_only=True, source='mensagem_set')
@@ -74,9 +88,20 @@ class ConversaDetailSerializer(serializers.ModelSerializer):
 
 #Forum serializers
 class TopicoSerializer(serializers.ModelSerializer):
+    has_liked = serializers.SerializerMethodField()
+
     class Meta:
         model = Topico
-        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'id_user', 'tags', 'created_at', 'updated_at']
+        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'id_user', 'tags', 'created_at', 'updated_at', 'has_liked']
+
+    def get_has_liked(self, obj):
+        id_user = self.context['request'].user.id if self.context.get('request') else None
+        
+        if id_user is None:
+            return False
+        else:
+            return LikeTopico.objects.filter(id_topico=obj.id, id_user=id_user).exists()
+
         
 class LikeTopicoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -89,11 +114,30 @@ class LikeComentarioSerializer(serializers.ModelSerializer):
         fields = ['id', 'id_comentario', 'id_user']
 
 class TopicoDetailSerializer(serializers.ModelSerializer):
+    has_liked = serializers.SerializerMethodField()
+
     class Meta:
         model = Topico
-        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'id_user', 'tags', 'created_at', 'updated_at']
+        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'id_user', 'tags', 'created_at', 'updated_at', "has_liked"]
+
+    def get_has_liked(self, obj):
+            id_user = self.context['request'].user.id if self.context.get('request') else None
+            
+            if id_user is None:
+                return False
+            else:
+                return LikeTopico.objects.filter(id_topico=obj.id, id_user=id_user).exists()
 
 class ComentarioSerializer(serializers.ModelSerializer):
+    has_liked = serializers.SerializerMethodField()
+
     class Meta:
         model = Comentario
-        fields = ['id', 'id_topico', 'id_user', 'descricao', 'created_at', 'updated_at']
+        fields = ['id', 'id_topico', 'id_user', 'descricao', 'created_at', 'updated_at', 'has_liked']
+
+    def get_has_liked(self, obj):
+            id_user = self.context['request'].id_user if self.context.get('request') else None
+            if id_user is None:
+                return False
+            else:
+                return LikeComentario.objects.filter(id_comentario=obj.id, id_user=id_user).exists()
