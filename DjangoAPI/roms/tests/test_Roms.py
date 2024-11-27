@@ -81,6 +81,3 @@ class RomsTests(APITestCase):
         response = self.client.delete(url, HTTP_AUTHORIZATION=f'Token {token}')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(ROM.objects.count(), 0)
-
-
-    
