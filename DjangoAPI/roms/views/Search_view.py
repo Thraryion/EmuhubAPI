@@ -19,7 +19,12 @@ Token = Token()
 class SearchGlobal(APIView):
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter('search', openapi.IN_QUERY, description="Termo de pesquisa", type=openapi.TYPE_STRING)
+            openapi.Parameter(
+                'search', 
+                openapi.IN_QUERY, 
+                description="Termo de pesquisa", 
+                type=openapi.TYPE_STRING
+            )
         ],
         responses={
             200: openapi.Response(
@@ -27,8 +32,32 @@ class SearchGlobal(APIView):
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     properties={
-                        'roms': openapi.Schema(type=openapi.TYPE_ARRAY, items=ROMSerializer),
-                        'topicos': openapi.Schema(type=openapi.TYPE_ARRAY, items=TopicoSerializer)
+                        'roms': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    'title': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'description': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'categoria': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'emulador': openapi.Schema(type=openapi.TYPE_STRING),
+                                }
+                            )
+                        ),
+                        'topicos': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    'titulo': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'descricao': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'id_categoria': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'tags': openapi.Schema(type=openapi.TYPE_STRING),
+                                }
+                            )
+                        )
                     }
                 )
             ),
@@ -38,7 +67,8 @@ class SearchGlobal(APIView):
             500: openapi.Response(
                 description="Erro interno do servidor."
             )
-        })
+        }
+    )
     def get(self, request):
         search = request.GET.get('search')
         if not search:
