@@ -7,3 +7,4 @@ from .Auth_view import Login, RefreshToken, ForgotPassword, ResetPassword
 from .Wishlist_view import UserAddWishlist, UserRemoveWishlist, UserViewWishlist
 from .Mensagens_view import MensagemCreate, ConversaCreate, Detail_Conversa, List_Conversas
 from .Search_view import SearchGlobal
+#from .denuncia_view import DenunciaCreate, DenunciaList, DenunciaUpdate
