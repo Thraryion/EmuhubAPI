@@ -55,24 +55,6 @@ class ROMDetailView(APIView):
             logger.error(f"Erro ao obter detalhes do ROM: {e}")
             return Response({'error': 'Erro interno do servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class ROMSearch(APIView):
-    @swagger_auto_schema(
-        manual_parameters=[
-            openapi.Parameter('rom_title', openapi.IN_QUERY, description="Título do ROM", type=openapi.TYPE_STRING)
-        ],
-        responses={
-            200: openapi.Response(description="Resultados da busca", schema=ROMSerializer(many=True)),
-            404: "ROM não encontrado"
-        })
-    def get(self, request):
-        try:
-            rom_title = request.GET.get('rom_title')
-            roms = ROM.objects.filter(title__icontains=rom_title)
-            serializer = ROMSerializer(roms, many=True)
-            return Response(serializer.data)
-        except ROM.DoesNotExist:
-            raise NotFound("ROM não encontrado")
-
 class ROMCreate(APIView):
     @swagger_auto_schema(
         request_body=ROMSerializer,

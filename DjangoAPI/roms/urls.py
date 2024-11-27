@@ -1,12 +1,13 @@
 from django.urls import path
 from .views import (
-                    ROMDelete, ROMCreate, ROMListView, ROMUpdate, ROMDownload, ROMSearch, ROMDetailView,
+                    ROMDelete, ROMCreate, ROMListView, ROMUpdate, ROMDownload, ROMDetailView,
                     UserRegister, UserViewWishlist, UserAddWishlist, UserDelete, UserListView, UserRemoveWishlist, 
                     UserUpdate, UserDetailView, RefreshToken, Login, MostPlayed, ForgotPassword, ResetPassword,
                     Emuladores, Categorias, EmuladorCreate, EmuladorUpdate, EmuladorDelete, EmuladorDownload,
                     CreateTopico, UpdateTopico, ListTopicos, DeleteTopico, TopicoDetail, LikeTopicoView, UnlikeTopicoView, list_categorias,
                     CreateComentario, UpdateComentario, ListComentarios, DeleteComentario, ComentarioIsHelpful, LikeComentarioView, UnlikeComentarioView,
-                    MensagemCreate, ConversaCreate, Detail_Conversa, List_Conversas
+                    MensagemCreate, ConversaCreate, Detail_Conversa, List_Conversas,
+                    SearchGlobal
                 )
 from django.conf.urls.static import static
 from django.conf import settings
@@ -14,7 +15,7 @@ from django.conf import settings
 urlpatterns = [
     path("roms/", ROMListView.as_view(), name="rom-list"),
     path("roms/detail/", ROMDetailView.as_view(), name="rom-detail"),
-    path("roms/search/", ROMSearch.as_view(), name="rom-search"),
+    path("search/", SearchGlobal.as_view(), name="search"),
     path('roms/mostplayed/', MostPlayed.as_view(), name='rom-mostplayed'),
     path("roms/<str:empresa>/<str:emulador_name>/<str:game_name>/download/", ROMDownload.as_view(), name="rom-download"),
     path("roms/update/", ROMUpdate.as_view(), name="rom-update"),

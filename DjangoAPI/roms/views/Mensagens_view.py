@@ -6,6 +6,7 @@ from django.http import Http404
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import logging
+from django.db.models import Q
 
 from ..models import Mensagem, Conversa
 from ..serializer import MensagemSerializer, ConversaDetailSerializer, ConversaSerializer
@@ -63,7 +64,7 @@ class ConversaCreate(APIView):
         if not payload:
             return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
         data = request.data.copy()
-        data['id_user'] = payload['user_id']
+        data['id_user1'] = payload['user_id']
         serializer = ConversaSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
@@ -115,6 +116,8 @@ class List_Conversas(APIView):
         if not payload:
             return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
         id_user = payload['user_id']
-        conversas = Conversa.objects.filter(id_user1=id_user)
+        conversas = Conversa.objects.filter(
+            Q(id_user1=id_user) | Q(id_user2=id_user)
+        ).distinct()
         serializer = ConversaSerializer(conversas, many=True)
         return Response(serializer.data)
