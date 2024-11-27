@@ -9,7 +9,7 @@ from drf_yasg import openapi
 import logging
 from django.db.models import Q
 
-from ..models import Topico, Roms, Categoria_Jogo, Categoria_Forum
+from ..models import Topico, ROM, Categoria_Jogo, CategoriaForum
 from ..serializer import TopicoSerializer, ROMSerializer
 from ..Classes.token import Token
 
@@ -23,11 +23,20 @@ class SearchGlobal(APIView):
         ],
         responses={
             200: openapi.Response(
-                description="Lista de comentários.",
-                schema=ComentarioSerializer(many=True)
+                description="Resultados da pesquisa.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'roms': openapi.Schema(type=openapi.TYPE_ARRAY, items=ROMSerializer),
+                        'topicos': openapi.Schema(type=openapi.TYPE_ARRAY, items=TopicoSerializer)
+                    }
+                )
             ),
-            401: openapi.Response(
-                description="Token inválido."
+            400: openapi.Response(
+                description="Nenhum termo de busca fornecido."
+            ),
+            500: openapi.Response(
+                description="Erro interno do servidor."
             )
         })
     def get(self, request):
@@ -36,20 +45,22 @@ class SearchGlobal(APIView):
             return Response({"detail": "Nenhum termo de busca fornecido."}, status=400)
         
         try:
-            roms = Roms.objects.filter(
-                Q(nome__icontains=search) |
-                Q(descricao__icontains=search) |
-                Q(categoria__nome__icontains=search)
+            roms = ROM.objects.filter(
+                Q(title__icontains=search) |
+                Q(description__icontains=search) |
+                Q(categoria__nome__icontains=search) |
+                Q(emulador__nome__icontains=search)
             ).distinct()
             topicos = Topico.objects.filter(
                 Q(titulo__icontains=search) |
                 Q(descricao__icontains=search) |
-                Q(id_categoria__nome__icontains=search)
+                Q(id_categoria__nome__icontains=search) |
+                Q(tags__icontains=search)
             ).distinct()
             serializer_roms = ROMSerializer(roms, many=True)
             serializer_topicos = TopicoSerializer(topicos, many=True)
 
-            Return Response({
+            return Response({
                 'roms': serializer_roms.data,
                 'topicos': serializer_topicos.data
             })

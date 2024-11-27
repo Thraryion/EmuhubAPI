@@ -57,7 +57,6 @@ class Mensagem(models.Model):
     id_conversa = models.ForeignKey('Conversa', on_delete=models.CASCADE)
     id_user = models.ForeignKey('User', on_delete=models.CASCADE)
     mensagem = models.TextField()
-    lida = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
 #forum
@@ -67,12 +66,9 @@ class Topico(models.Model):
     img_topico = models.ImageField(upload_to='img-topico/', blank=True, null=True)
     id_categoria = models.ForeignKey('CategoriaForum', on_delete=models.CASCADE)
     id_user = models.ForeignKey('User', on_delete=models.CASCADE)
-    tags = models.ManyToManyField('Tags', blank=True)
+    tags = models.CharField(max_length=125, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-class Tags(models.Model):
-    nome = models.CharField(max_length=125)
 
 class CategoriaForum(models.Model):
     nome = models.CharField(max_length=125)

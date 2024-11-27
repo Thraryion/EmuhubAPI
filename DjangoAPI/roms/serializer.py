@@ -68,16 +68,21 @@ class CategoriaJogoSerializer(serializers.ModelSerializer):
 
 #gerencia criacao e listagem de mensagens
 class MensagemSerializer(serializers.ModelSerializer):
-    id_user = serializers.ReadOnlyField(source='id_user.username')
+    id_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all()) 
+    username = serializers.SerializerMethodField()
 
     class Meta:
         model = Mensagem
-        fields = ['id', 'id_conversa', 'id_user', 'mensagem', 'lida', 'created_at']
+        fields = ['id', 'id_conversa', 'id_user', 'username', 'mensagem', 'created_at']
+
+    def get_username(self, obj):
+        return obj.id_user.username
 
 class ConversaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversa
         fields = ['id','id_user1', 'id_user2', 'created_at', 'updated_at']
+
 
 class ConversaDetailSerializer(serializers.ModelSerializer):
     mensagens = MensagemSerializer(many=True, read_only=True, source='mensagem_set')

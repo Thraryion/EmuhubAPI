@@ -6,7 +6,7 @@ from .views import (
                     Emuladores, Categorias, EmuladorCreate, EmuladorUpdate, EmuladorDelete, EmuladorDownload,
                     CreateTopico, UpdateTopico, ListTopicos, DeleteTopico, TopicoDetail, LikeTopicoView, UnlikeTopicoView, list_categorias,
                     CreateComentario, UpdateComentario, ListComentarios, DeleteComentario, ComentarioIsHelpful, LikeComentarioView, UnlikeComentarioView,
-                    MensagemCreate, ConversaCreate, Detail_Conversa, List_Conversas
+                    MensagemCreate, ConversaCreate, Detail_Conversa, List_Conversas,
                     SearchGlobal
                 )
 from django.conf.urls.static import static
