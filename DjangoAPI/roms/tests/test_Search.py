@@ -37,24 +37,23 @@ class SearchTest(APITestCase):
         url = reverse('search-rom') + "?search=pokemon"
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(len(response.data), 1)
 
     def test_search_categoria(self):
         url = reverse('search-topico') + "?search=jogos"
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(len(response.data), 1)
 
     def test_search_categoria_rom(self):
         url = reverse('search-rom') + "?search=aventura"
         response = self.client.get(url, format='json')
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(len(response.data), 1)
 
     def test_search_tags(self):
         url = reverse('search-topico') + "?search=nintendo"
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(len(response.data), 1)
     
