@@ -11,9 +11,11 @@ import logging
 from ..models import Comentario, LikeComentario, User
 from ..serializer import ComentarioSerializer, LikeComentarioSerializer
 from ..Classes.token import Token
+from ..Classes.notificacoes import PusherClient
 
 logger = logging.getLogger(__name__)
 Token = Token()
+Pusher = PusherClient()
 
 class CreateComentario(APIView):
     @swagger_auto_schema(
@@ -155,18 +157,23 @@ class LikeComentarioView(APIView):
             )
         })
     def post(self, request):
-        comentario_id = request.data.get('comentario_id')
+        comentario_id = request.data.get('id_comentario')
+        comentario = Comentario.objects.get(id=comentario_id)
+
         token = request.headers.get('Authorization', '').split(' ')[1]
         payload = Token.decode_token(token)
         if not payload:
             return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
         user_id = payload['user_id']
+        user = User.objects.get(id=user_id)
+
         data = request.data.copy()
         data['id_user'] = user_id
         try:
             serializer = LikeComentarioSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
+                Pusher.notificarLike(user.username, 'Comentario', comentario.id_user_id ,comentario_id)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:

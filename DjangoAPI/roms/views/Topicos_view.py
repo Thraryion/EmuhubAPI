@@ -8,6 +8,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import logging
 
+from ..Classes.notificacoes import PusherClient
 from ..Classes.token import Token
 from ..models import Topico, LikeTopico, User, CategoriaForum
 from ..serializer import TopicoSerializer, LikeTopicoSerializer
@@ -15,6 +16,7 @@ from ..serializer import TopicoSerializer, LikeTopicoSerializer
 logger = logging.getLogger(__name__)
 
 Token = Token()
+Pusher = PusherClient()
 
 class CreateTopico(APIView):    
     @swagger_auto_schema(
@@ -206,6 +208,8 @@ class LikeTopicoView(APIView):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

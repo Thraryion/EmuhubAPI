@@ -5,14 +5,14 @@ from .models import ROM, User, Conversa, Mensagem, Topico, Emulador, Categoria_J
 #rom serializer
 class ROMSerializer(serializers.ModelSerializer):
     categoria_nome = serializers.SerializerMethodField()
-
+    
     class Meta:
         model = ROM
-        fields = ['title', 'description', 'categoria', 'categoria_nome', 'emulador', 'image', 'file']
+        fields = ['title', 'description', 'categoria', 'categoria_nome','emulador', 'image', 'file']
 
     def get_categoria_nome(self, obj):
         categoria = Categoria_Jogo.objects.get(id=obj.categoria_id)
-        return cotegoria.nome
+        return categoria.nome
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

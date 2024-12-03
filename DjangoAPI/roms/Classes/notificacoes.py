@@ -10,5 +10,9 @@ class PusherClient:
         ssl=True
     )
 
-    def notificar(self, canal, evento, data):
-        self.pusher_client.trigger(canal, evento, data)
+    def notificarLike(self, username, content_nome, id_user, id_content):
+        self.pusher_client.trigger('like-channel', 'like-event', {'message': f'{username} deu like no seu {content_nome}',
+                                                                  'id_user': id_user,
+                                                                  'id_content': id_content,
+                                                                  'username': username, 
+                                                                  'content_nome': content_nome})
