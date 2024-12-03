@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 
 from ..Classes.wishlist import Wishlist
 from ..Classes.token import Token
-from ..models import Denuncia, Moderacao, User
+from ..models import Denuncia, User
 from ..serializer import DenunciaSerializer
 
 Token = Token()
