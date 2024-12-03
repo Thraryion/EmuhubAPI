@@ -269,4 +269,4 @@ class list_categorias(APIView):
     def get(self, request):
         categorias = CategoriaForum.objects.all()
         categorias_data = [{'id': categoria.id, 'categoria': categoria.nome} for categoria in categorias]
-        return Response({'categorias': categorias_data})
+        return Response(categorias_data)
