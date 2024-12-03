@@ -60,6 +60,7 @@ class Roms():
     
     def create_data(self, id_rom, title, description, emulador, categoria, image_base64, file, empresa):
         file_name = None
+        categoria = Categoria_Jogo.objects.get(id=categoria)
         try:
             if file and hasattr(file, 'path'):
                 file_name = os.path.basename(file.path)
@@ -77,6 +78,7 @@ class Roms():
             'categoria': categoria,
             'empresa': empresa,
             'image_base64': image_base64,
+            'categoria_name': categoria.nome,
             'file': file_name,
         }
         return rom
