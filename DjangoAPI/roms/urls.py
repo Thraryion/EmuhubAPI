@@ -16,7 +16,7 @@ from django.conf import settings
 urlpatterns = [
     path("roms/", ROMListView.as_view(), name="rom-list"),
     path("roms/detail/", ROMDetailView.as_view(), name="rom-detail"),
-    path("roms/search", SearchGlobal.as_view(), name="search-rom"),
+    path("roms/search", SearchRom.as_view(), name="search-rom"),
     path('roms/mostplayed/', MostPlayed.as_view(), name='rom-mostplayed'),
     path("roms/<str:empresa>/<str:emulador_name>/<str:game_name>/download/", ROMDownload.as_view(), name="rom-download"),
     path("roms/update/", ROMUpdate.as_view(), name="rom-update"),

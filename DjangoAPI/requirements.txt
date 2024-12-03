@@ -8,3 +8,4 @@ django-cors-headers
 async-property
 adrf==0.1.7
 drf-yasg
+pusher
