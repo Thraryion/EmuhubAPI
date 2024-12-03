@@ -7,7 +7,8 @@ from .views import (
                     CreateTopico, UpdateTopico, ListTopicos, DeleteTopico, TopicoDetail, LikeTopicoView, UnlikeTopicoView, list_categorias,
                     CreateComentario, UpdateComentario, ListComentarios, DeleteComentario, ComentarioIsHelpful, LikeComentarioView, UnlikeComentarioView,
                     MensagemCreate, ConversaCreate, Detail_Conversa, List_Conversas,
-                    SearchGlobal
+                    SearchRom, SearchTopico,
+                    CreateDenuncia, List_Denuncia, banned_User
                 )
 from django.conf.urls.static import static
 from django.conf import settings
@@ -15,7 +16,7 @@ from django.conf import settings
 urlpatterns = [
     path("roms/", ROMListView.as_view(), name="rom-list"),
     path("roms/detail/", ROMDetailView.as_view(), name="rom-detail"),
-    path("search/", SearchGlobal.as_view(), name="search"),
+    path("roms/search", SearchGlobal.as_view(), name="search-rom"),
     path('roms/mostplayed/', MostPlayed.as_view(), name='rom-mostplayed'),
     path("roms/<str:empresa>/<str:emulador_name>/<str:game_name>/download/", ROMDownload.as_view(), name="rom-download"),
     path("roms/update/", ROMUpdate.as_view(), name="rom-update"),
@@ -45,6 +46,7 @@ urlpatterns = [
     path("topicos/delete/", DeleteTopico.as_view(), name="topico-delete"),
     path("topicos/detail/", TopicoDetail.as_view(), name="topico-detail"),
     path("topicos/categorias/", list_categorias.as_view(), name="topico-categorias"),
+    path("topicos/search", SearchTopico.as_view(), name="search-topico"),
     path("comentarios/create/", CreateComentario.as_view(), name="comentario-create"),
     path("comentarios/update/", UpdateComentario.as_view(), name="comentario-update"),
     path("comentarios/list/", ListComentarios.as_view(), name="comentario-list"),
@@ -58,4 +60,7 @@ urlpatterns = [
     path("conversas/detail/", Detail_Conversa.as_view(), name="conversa-detail"),
     path("conversas/list/", List_Conversas.as_view(), name="conversa-list"),
     path("mensagens/create/", MensagemCreate.as_view(), name="mensagem-create"),
+    path("denuncia/create/", CreateDenuncia.as_view(), name="denuncia-create"),
+    path("denuncia/list/", List_Denuncia.as_view(), name="denuncia-list"),
+    path("banned/", banned_User.as_view(), name="banned-user")
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

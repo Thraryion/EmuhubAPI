@@ -1,13 +1,18 @@
 from rest_framework import serializers
-from .models import ROM, User, Conversa, Mensagem, Topico, Emulador, Categoria_Jogo, Comentario, LikeComentario, LikeTopico, CategoriaForum
+from .models import ROM, User, Conversa, Mensagem, Topico, Emulador, Categoria_Jogo, Comentario, LikeComentario, LikeTopico, CategoriaForum, Denuncia, Moderacao
 
 
 #rom serializer
 class ROMSerializer(serializers.ModelSerializer):
+    categoria_nome = serializers.SerializerMethodField()
 
     class Meta:
         model = ROM
-        fields = ['title', 'description', 'categoria', 'emulador', 'image', 'file']
+        fields = ['title', 'description', 'categoria', 'categoria_nome', 'emulador', 'image', 'file']
+
+    def get_categoria_nome(self, obj):
+        categoria = Categoria_Jogo.objects.get(id=obj.categoria_id)
+        return cotegoria.nome
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -94,10 +99,11 @@ class ConversaDetailSerializer(serializers.ModelSerializer):
 #Forum serializers
 class TopicoSerializer(serializers.ModelSerializer):
     has_liked = serializers.SerializerMethodField()
+    categoria = serializers.SerializerMethodField()
 
     class Meta:
         model = Topico
-        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'id_user', 'tags', 'created_at', 'updated_at', 'has_liked']
+        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'categoria' ,'id_user', 'tags', 'created_at', 'updated_at', 'has_liked']
 
     def get_has_liked(self, obj):
         id_user = self.context['request'].user.id if self.context.get('request') else None
@@ -107,6 +113,9 @@ class TopicoSerializer(serializers.ModelSerializer):
         else:
             return LikeTopico.objects.filter(id_topico=obj.id, id_user=id_user).exists()
 
+    def get_categoria(self, obj):
+        categoria = CategoriaForum.objects.get(id=obj.id_categoria.id)
+        return categoria.nome 
         
 class LikeTopicoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -146,3 +155,8 @@ class ComentarioSerializer(serializers.ModelSerializer):
                 return False
             else:
                 return LikeComentario.objects.filter(id_comentario=obj.id, id_user=id_user).exists()
+
+class DenunciaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Denuncia
+        fields = ['id', 'reported_by', 'content_type', 'content_id', 'reason', 'status', 'reviewed_by', 'resolution', 'created_at', 'updated_at']

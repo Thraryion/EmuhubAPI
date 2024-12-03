@@ -16,7 +16,7 @@ from ..Classes.token import Token
 logger = logging.getLogger(__name__)
 Token = Token()
 
-class SearchGlobal(APIView):
+class SearchTopico(APIView):
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter(
@@ -32,19 +32,6 @@ class SearchGlobal(APIView):
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     properties={
-                        'roms': openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Schema(
-                                type=openapi.TYPE_OBJECT,
-                                properties={
-                                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                                    'title': openapi.Schema(type=openapi.TYPE_STRING),
-                                    'description': openapi.Schema(type=openapi.TYPE_STRING),
-                                    'categoria': openapi.Schema(type=openapi.TYPE_STRING),
-                                    'emulador': openapi.Schema(type=openapi.TYPE_STRING),
-                                }
-                            )
-                        ),
                         'topicos': openapi.Schema(
                             type=openapi.TYPE_ARRAY,
                             items=openapi.Schema(
@@ -75,26 +62,75 @@ class SearchGlobal(APIView):
             return Response({"detail": "Nenhum termo de busca fornecido."}, status=400)
         
         try:
-            roms = ROM.objects.filter(
-                Q(title__icontains=search) |
-                Q(description__icontains=search) |
-                Q(categoria__nome__icontains=search) |
-                Q(emulador__nome__icontains=search)
-            ).distinct()
             topicos = Topico.objects.filter(
                 Q(titulo__icontains=search) |
                 Q(descricao__icontains=search) |
                 Q(id_categoria__nome__icontains=search) |
                 Q(tags__icontains=search)
             ).distinct()
-            serializer_roms = ROMSerializer(roms, many=True)
             serializer_topicos = TopicoSerializer(topicos, many=True)
 
             return Response({
-                'roms': serializer_roms.data,
                 'topicos': serializer_topicos.data
             })
 
+        except Exception as e:
+            logger.error(f"Erro ao buscar dados: {e}")
+            return Response({'error': 'Erro interno do servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class SearchRom(APIView):
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'search',
+                openapi.IN_QUERY,
+                description="Termo de pesquisa",
+                type=openapi.TYPE_STRING
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="Resultados da pesquisa.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'roms': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    'title': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'description': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'categoria': openapi.Schema(type=openapi.TYPE_STRING),
+                                    'emulador': openapi.Schema(type=openapi.TYPE_STRING),
+                                }
+                            )
+                        )
+                    }
+                )
+            ),
+            400: openapi.Response(
+                description="Nenhum termo de busca fornecido."
+            ),
+            500: openapi.Response(
+                description="Erro interno do servidor."
+            )
+        }
+    )
+    def get(self, request):
+        search = request.GET.get('search')
+        if not search:
+            return Response({"detail": "Nenhum termo de busca fornecido."}, status=400)
+        try:
+            roms = ROM.objects.filter(
+                Q(title__icontains=search) |
+                Q(description__icontains=search) |
+                Q(categoria__nome__icontains=search) |
+                Q(emulador__nome__icontains=search)
+            ).distinct()
+            serializer_roms = ROMSerializer(roms, many=True)
+            return Response({'roms': serializer_roms.data})
         except Exception as e:
             logger.error(f"Erro ao buscar dados: {e}")
             return Response({'error': 'Erro interno do servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
