@@ -101,17 +101,8 @@ class Comentario(models.Model):
     class Meta:
         ordering = ['created_at']
 
-class Notificacao(models.Model):
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
-    tipo = models.CharField(max_length=50)
-    referencia_id = models.IntegerField()
-    mensagem = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    is_read = models.BooleanField(default=False)
-
 class Denuncia(models.Model):
     reported_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='reports')
-    
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     content_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'content_id')    
@@ -121,10 +112,3 @@ class Denuncia(models.Model):
     resolution = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-class Moderacao(models.Model):
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
-    action = models.CharField(max_length=50)
-    reason = models.TextField()
-    actioned_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='moderated_actions')
-    actioned_at = models.DateTimeField(auto_now_add=True)

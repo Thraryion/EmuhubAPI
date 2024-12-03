@@ -13,8 +13,6 @@ class RomsTests(APITestCase):
             password='123',
             admin=True,
         )
-        self.user.set_password('123') 
-        self.user.save()
         self.categoria = Categoria_Jogo.objects.create(
             nome='Test Category',
         )
