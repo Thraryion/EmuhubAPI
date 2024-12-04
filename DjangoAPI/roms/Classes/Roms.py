@@ -73,13 +73,16 @@ class Roms():
             'id': id_rom,
             'title': title,
             'description': description,
-            'categoria': categoria,
             'image_base64': image_base64,
             'emulador': {
                 'nome': emulador_nome,
                 'console': console,
                 'empresa': empresa,
                 'id': emulador,
+            },
+            'categoria':{
+                'categoria_name': categoria_nome,
+                'categoria': categoria,
             },
             'categoria_name': categoria_nome,
             'file': file_name,
