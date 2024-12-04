@@ -80,7 +80,7 @@ class Roms():
                 'console': console,
                 'empresa': empresa,
                 'id': emulador,
-            }
+            },
             'categoria_name': categoria_nome,
             'file': file_name,
         }
