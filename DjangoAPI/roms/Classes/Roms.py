@@ -77,7 +77,7 @@ class Roms():
             'image_base64': image_base64,
             'emulador': {
                 'nome': emulador_nome,
-                'console': console
+                'console': console,
                 'empresa': empresa,
                 'id': emulador,
             }
