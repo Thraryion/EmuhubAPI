@@ -28,7 +28,7 @@ class Roms():
         for rom in roms:
             categoria = Categoria_Jogo.objects.get(id=rom.categoria_id)
             emulador = Emulador.objects.get(id=rom.emulador_id)
-            jogo = self.create_data(rom.id, rom.title, rom.description, rom.emulador_id, rom.categoria_id, categoria.nome ,self.encode_image_to_base64(rom.image), rom.file, emulador.empresa)
+            jogo = self.create_data(rom.id, rom.title, rom.description, rom.emulador_id, rom.categoria_id, categoria.nome ,self.encode_image_to_base64(rom.image), rom.file, emulador.empresa, emulador.console, emulador.nome)
             data.append(jogo)
         return data
 
@@ -37,7 +37,7 @@ class Roms():
             rom = ROM.objects.get(id=id_rom)
             categoria = Categoria_Jogo.objects.get(id=rom.categoria_id)
             emulador = Emulador.objects.get(id=rom.emulador_id)
-            data = self.create_data(rom.id, rom.title, rom.description, rom.emulador_id, rom.categoria_id, categoria.nome ,self.encode_image_to_base64(rom.image), rom.file, emulador.empresa)
+            data = self.create_data(rom.id, rom.title, rom.description, rom.emulador_id, rom.categoria_id, categoria.nome ,self.encode_image_to_base64(rom.image), rom.file, emulador.empresa, emulador.console, emulador.nome)
             return data
         except ROM.DoesNotExist:
             raise NotFound()
@@ -52,13 +52,13 @@ class Roms():
             for rom in roms:
                 categoria = Categoria_Jogo.objects.get(id=rom.categoria_id)
                 emulador = Emulador.objects.get(id=rom.emulador_id)
-                jogo = self.create_data(rom.id, rom.title, rom.description, rom.emulador_id, rom.categoria_id, self.encode_image_to_base64(rom.image), rom.file, emulador.empresa)
+                jogo = self.create_data(rom.id, rom.title, rom.description, rom.emulador_id, rom.categoria_id, categoria.nome, self.encode_image_to_base64(rom.image), rom.file, emulador.empresa, emulador.console, emulador.nome)
                 data.append(jogo)
             return data
         except ROM.DoesNotExist:
             raise NotFound()
     
-    def create_data(self, id_rom, title, description, emulador, categoria, categoria_nome, image_base64, file, empresa):
+    def create_data(self, id_rom, title, description, emulador, categoria, categoria_nome, image_base64, file, empresa, console, emulador_nome):
         file_name = None
         try:
             if file and hasattr(file, 'path'):
@@ -73,10 +73,14 @@ class Roms():
             'id': id_rom,
             'title': title,
             'description': description,
-            'emulador': emulador,
             'categoria': categoria,
-            'empresa': empresa,
             'image_base64': image_base64,
+            'emulador': {
+                'nome': emulador_nome,
+                'console': console
+                'empresa': empresa,
+                'id': emulador,
+            }
             'categoria_name': categoria_nome,
             'file': file_name,
         }
