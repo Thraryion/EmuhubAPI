@@ -81,8 +81,8 @@ class Roms():
                 'id': emulador,
             },
             'categoria':{
-                'categoria_name': categoria_nome,
-                'categoria': categoria,
+                'id': categoria,
+                'nome': categoria_nome,
             },
             'categoria_name': categoria_nome,
             'file': file_name,
