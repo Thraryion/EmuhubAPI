@@ -8,7 +8,7 @@ import jwt
 class AuthTests(APITestCase):
     def setUp(self):
         self.user = User.objects.create(
-            email='leonardolcp@live.com',
+            email='test@example.com',
             password='123456',
             username='Admin',
         )
@@ -17,21 +17,21 @@ class AuthTests(APITestCase):
 
     def test_login_success(self):
         url = reverse('token') 
-        data = {'email': 'leonardolcp@live.com', 'password': '123456'}
+        data = {'email': 'test@example.com', 'password': '123456'}
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('token', response.data)
 
     def test_login_invalid_credentials(self):
         url = reverse('token')
-        data = {'email': 'leonardolcp@live.com', 'password': 'wrongpassword'}
+        data = {'email': 'test@example.com', 'password': 'wrongpassword'}
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertIn('error', response.data)
 
     def test_forgot_password(self):
         url = reverse('forgot-password')
-        data = {'email': 'leonardolcp@live.com'}
+        data = {'email': 'test@example.com'}
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('message', response.data)
@@ -56,9 +56,10 @@ class AuthTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_refresh_token(self):
-        test_login_success()
-        url = reverse('refresh-token')
-        response = self.client.post(url)
+        token = self._generate_token()
+        url = reverse('token-refresh')
+        self.client.cookies['refresh_token'] = token
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('token', response.data)
 

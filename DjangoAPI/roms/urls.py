@@ -1,12 +1,22 @@
 from django.urls import path
-from .views import ROMDelete, ROMCreate, ROMListView, ROMUpdate, ROMDownload, UserRegister, UserViewWishlist, UserAddWishlist, UserDelete, UserListView, UserRemoveWishlist, UserUpdate, RefreshToken, Login, MostPlayed ,ROMDetailView, UserDetailView, ROMSearch, ForgotPassword, ResetPassword, ProtectedRoute, Emuladores, Categorias, EmuladorCreate, EmuladorUpdate, EmuladorDelete
+from .views import (
+                    ROMDelete, ROMCreate, ROMListView, ROMUpdate, ROMDownload, ROMDetailView,
+                    UserRegister, UserViewWishlist, UserAddWishlist, UserDelete, UserListView, UserRemoveWishlist, 
+                    UserUpdate, UserDetailView, RefreshToken, Login, MostPlayed, ForgotPassword, ResetPassword,
+                    Emuladores, Categorias, EmuladorCreate, EmuladorUpdate, EmuladorDelete, EmuladorDownload,
+                    CreateTopico, UpdateTopico, ListTopicos, DeleteTopico, TopicoDetail, LikeTopicoView, UnlikeTopicoView, list_categorias,
+                    CreateComentario, UpdateComentario, ListComentarios, DeleteComentario, ComentarioIsHelpful, LikeComentarioView, UnlikeComentarioView,
+                    MensagemCreate, ConversaCreate, Detail_Conversa, List_Conversas,
+                    SearchRom, SearchTopico,
+                    CreateDenuncia, List_Denuncia, banned_User
+                )
 from django.conf.urls.static import static
 from django.conf import settings
 
 urlpatterns = [
     path("roms/", ROMListView.as_view(), name="rom-list"),
     path("roms/detail/", ROMDetailView.as_view(), name="rom-detail"),
-    path("roms/search/", ROMSearch.as_view(), name="rom-search"),
+    path("roms/search", SearchRom.as_view(), name="search-rom"),
     path('roms/mostplayed/', MostPlayed.as_view(), name='rom-mostplayed'),
     path("roms/<str:empresa>/<str:emulador_name>/<str:game_name>/download/", ROMDownload.as_view(), name="rom-download"),
     path("roms/update/", ROMUpdate.as_view(), name="rom-update"),
@@ -24,10 +34,33 @@ urlpatterns = [
     path("token/", Login.as_view(), name="token"),
     path("forgot-password/" , ForgotPassword.as_view(), name="forgot-password"),
     path("reset-password/", ResetPassword.as_view(), name="reset-password"),
-    path("protected/", ProtectedRoute.as_view(), name="protected"),
     path("emuladores/", Emuladores.as_view(), name="emuladores"),
     path("emulador/create/", EmuladorCreate.as_view(), name="emulador-create"),
     path("emulador/update/", EmuladorUpdate.as_view(), name="emulador-update"),
     path("emulador/delete/", EmuladorDelete.as_view(), name="emulador-delete"),
-    path("categorias/", Categorias.as_view(), name="categorias")
+    path("emulador/<str:emulador_name>/download/", EmuladorDownload.as_view(), name="emulador-download"),
+    path("categorias/", Categorias.as_view(), name="categorias"),
+    path("topicos/create/", CreateTopico.as_view(), name="topico-create"),
+    path("topicos/update/", UpdateTopico.as_view(), name="topico-update"),
+    path("topicos/list/", ListTopicos.as_view(), name="topico-list"),
+    path("topicos/delete/", DeleteTopico.as_view(), name="topico-delete"),
+    path("topicos/detail/", TopicoDetail.as_view(), name="topico-detail"),
+    path("topicos/categorias/", list_categorias.as_view(), name="topico-categorias"),
+    path("topicos/search", SearchTopico.as_view(), name="search-topico"),
+    path("comentarios/create/", CreateComentario.as_view(), name="comentario-create"),
+    path("comentarios/update/", UpdateComentario.as_view(), name="comentario-update"),
+    path("comentarios/list/", ListComentarios.as_view(), name="comentario-list"),
+    path("comentarios/delete/", DeleteComentario.as_view(), name="comentario-delete"),
+    path("topicos/like/", LikeTopicoView.as_view(), name="topico-like"),
+    path("topicos/unlike/", UnlikeTopicoView.as_view(), name="topico-unlike"),
+    path("comentarios/like/", LikeComentarioView.as_view(), name="comentario-like"),
+    path("comentarios/unlike/", UnlikeComentarioView.as_view(), name="comentario-unlike"),
+    path("comentarios/is-helpful/", ComentarioIsHelpful.as_view(), name="comentario-is-helpful"),
+    path("conversas/create/", ConversaCreate.as_view(), name="conversa-create"),
+    path("conversas/detail/", Detail_Conversa.as_view(), name="conversa-detail"),
+    path("conversas/list/", List_Conversas.as_view(), name="conversa-list"),
+    path("mensagens/create/", MensagemCreate.as_view(), name="mensagem-create"),
+    path("denuncia/create/", CreateDenuncia.as_view(), name="denuncia-create"),
+    path("denuncia/list/", List_Denuncia.as_view(), name="denuncia-list"),
+    path("banned/", banned_User.as_view(), name="banned-user")
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

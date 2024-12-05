@@ -1,4 +1,7 @@
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import check_password
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 class User(models.Model):
@@ -8,6 +11,11 @@ class User(models.Model):
     admin = models.BooleanField(default=False)
     imagem_perfil = models.ImageField(upload_to='img-perfil/')
     wishlist = models.ManyToManyField('ROM', related_name='wishlist', blank=True)
+    is_active = models.BooleanField(default=True)
+    is_banned = models.BooleanField(default=False)
+    notify_comments = models.BooleanField(default=True)
+    notify_likes = models.BooleanField(default=True)
+    notify_messages = models.BooleanField(default=True) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -15,14 +23,14 @@ class User(models.Model):
         self.password = make_password(password)
 
     def check_password(self, password):
-        from django.contrib.auth.hashers import check_password
         return check_password(password, self.password)
 
+#Jogos e Emulador
 class Emulador(models.Model):
     nome = models.CharField(max_length=125)
     console = models.CharField(max_length=125)
     empresa = models.CharField(max_length=40)
-    emu_file = models.FileField(upload_to='emuladores/' blank=True, null=True)
+    emu_file = models.FileField(upload_to='emuladores/', blank=True, null=True)
 
 class Categoria_Jogo(models.Model):
     nome = models.CharField(max_length=125)
@@ -40,36 +48,67 @@ class ROM(models.Model):
 
 #mensagens privadas
 class Conversa(models.Model):
+    id_user1 = models.ForeignKey('User', on_delete=models.CASCADE, related_name='user1')
+    id_user2 = models.ForeignKey('User', on_delete=models.CASCADE, related_name='user2')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-class ParticipantesCoversa(models.Model):
-    id_conversa = models.ForeignKey('Conversa', on_delete=models.CASCADE)
-    id_user = models.ForeignKey('User', on_delete=models.CASCADE)
 
 class Mensagem(models.Model):
     id_conversa = models.ForeignKey('Conversa', on_delete=models.CASCADE)
     id_user = models.ForeignKey('User', on_delete=models.CASCADE)
     mensagem = models.TextField()
-    lida = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
 #forum
 class Topico(models.Model):
     titulo = models.CharField(max_length=125)
     descricao = models.TextField()
-    id_categoria = models.ForeignKey('Categoria_Forum', on_delete=models.CASCADE)
+    img_topico = models.ImageField(upload_to='img-topico/', blank=True, null=True)
+    id_categoria = models.ForeignKey('CategoriaForum', on_delete=models.CASCADE)
     id_user = models.ForeignKey('User', on_delete=models.CASCADE)
+    tags = models.CharField(max_length=125, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-class Postagem(models.Model):
-    titulo = models.CharField(max_length=125)
+class CategoriaForum(models.Model):
+    nome = models.CharField(max_length=125)
+
+class LikeTopico(models.Model):
+    id_topico = models.ForeignKey('Topico', on_delete=models.CASCADE)
+    id_user = models.ForeignKey('User', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('id_topico', 'id_user')
+
+class LikeComentario(models.Model):
+    id_comentario = models.ForeignKey('Comentario', on_delete=models.CASCADE)
+    id_user = models.ForeignKey('User', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('id_comentario', 'id_user')
+
+class Comentario(models.Model):
     descricao = models.TextField()
     id_topico = models.ForeignKey('Topico', on_delete=models.CASCADE)
     id_user = models.ForeignKey('User', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    id_parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
+    is_helpful = models.BooleanField(default=False)
 
-class Categoria_Forum(models.Model):
-    nome = models.CharField(max_length=125)
+    class Meta:
+        ordering = ['created_at']
+
+class Denuncia(models.Model):
+    reported_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='reports')
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    content_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'content_id')    
+    reason = models.TextField()
+    status = models.CharField(max_length=20, default='pendente')
+    reviewed_by = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_reports')
+    resolution = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

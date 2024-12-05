@@ -24,7 +24,7 @@ class Auth:
             if not check_password(password, user.password):
                 return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
-            token = self.Token.create_token(user.id, user.admin, datetime.utcnow() + timedelta(minutes=15))
+            token = self.Token.create_token(user.id, user.admin, datetime.utcnow() + timedelta(minutes=60))
             refresh_token = self.Token.create_token(user.id, user.admin, datetime.utcnow() + timedelta(days=7))
 
             response = Response({'token': token, 'user': UserSerializer(user).data})
@@ -39,8 +39,8 @@ class Auth:
             return Response({'error': 'Refresh token not provided'}, status=status.HTTP_401_UNAUTHORIZED)
         try:
             payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=['HS256'])
-            user = User.objects.get(id=payload['id'])
-            token = Token.create_token(user.id, user.admin, datetime.utcnow() + timedelta(minutes=15))
+            user = User.objects.get(id=payload['user_id'])
+            token = self.Token.create_token(user.id, user.admin, datetime.utcnow() + timedelta(minutes=60))
             serializer = UserSerializer(user)
             return Response({'token': token, 'user': serializer.data})
         except jwt.ExpiredSignatureError:
@@ -55,15 +55,15 @@ class Auth:
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            token = self.Token.create_token(user.id, user.admin, datetime.utcnow() + timedelta(minutes=15))
+            token = self.Token.create_token(user.id, user.admin, datetime.utcnow() + timedelta(minutes=10))
 
             subject = "Reset your password"
             message = f'''Olá,<br><br>
             Clique no link abaixo para alterar a senha:<br><br>
-            <a href="http://localhost:5173/reset-password?token={token}">Clique aqui</a>'''
+            <a href="http://52.45.165.140:5173/reset-password?token={token}">Clique aqui</a>'''
 
             msg = MIMEMultipart()
-            msg['From'] = settings.EMAIL_HOST_USER
+            msg['From'] = settings.EMAIL_HOST_USERail.outlook.com
             msg['To'] = email
             msg['Subject'] = subject
             msg.attach(MIMEText(message, 'html'))

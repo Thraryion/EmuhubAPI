@@ -10,14 +10,4 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameField(
-            model_name="rom",
-            old_name="id_categoria",
-            new_name="categoria",
-        ),
-        migrations.RenameField(
-            model_name="rom",
-            old_name="id_emulador",
-            new_name="emulador",
-        ),
     ]
