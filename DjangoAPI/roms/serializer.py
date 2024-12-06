@@ -23,6 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
             'admin': {'required': False},
             'username': {'required': False},
             'email': {'required': False},
+            'imagem_perfil': {'required': False},
         }
 
     def validate(self, data):
