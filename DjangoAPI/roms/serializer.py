@@ -103,7 +103,7 @@ class TopicoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Topico
-        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'categoria' ,'id_user', 'tags', 'topico_ban', 'created_at', 'updated_at', 'has_liked']
+        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'categoria' ,'id_user', 'tags', 'topico_delete', 'created_at', 'updated_at', 'has_liked']
 
     def get_has_liked(self, obj):
         id_user = self.context['request'].user.id if self.context.get('request') else None
@@ -147,7 +147,7 @@ class ComentarioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comentario
-        fields = ['id', 'id_topico', 'id_user', 'descricao', 'created_at', 'updated_at', 'has_liked']
+        fields = ['id', 'id_topico', 'id_user', 'descricao', 'comentario_delete', 'created_at', 'updated_at', 'has_liked']
 
     def get_has_liked(self, obj):
             id_user = self.context['request'].id_user if self.context.get('request') else None
