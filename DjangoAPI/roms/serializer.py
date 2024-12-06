@@ -17,7 +17,7 @@ class ROMSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'admin', 'imagem_perfil']
+        fields = ['id', 'username', 'email', 'password', 'admin', 'imagem_perfil', 'is_active', 'is_banned']
         extra_kwargs = {
             'password': {'write_only': True, 'required': False},
             'admin': {'required': False},

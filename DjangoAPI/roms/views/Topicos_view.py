@@ -62,7 +62,7 @@ class ListTopicos(APIView):
             )
         })
     def get(self, request):
-        topicos = Topico.objects.all().order_by('-created_at')
+        topicos = Topico.objects.filter(topico_delete=False).order_by('-created_at')
         
         serializer = TopicoSerializer(topicos, many=True, context={'request': request})
 
