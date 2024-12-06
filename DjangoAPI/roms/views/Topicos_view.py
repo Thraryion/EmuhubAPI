@@ -141,7 +141,8 @@ class DeleteTopico(APIView):
         topico_id = request.data.get('topico_id')
         try:
             topico = Topico.objects.get(id=topico_id)
-            topico.delete()
+            topico.topico_delete = True
+            topico.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Topico.DoesNotExist:
             return Response({'error': 'Tópico não encontrado'}, status=status.HTTP_404_NOT_FOUND)
@@ -197,16 +198,20 @@ class LikeTopicoView(APIView):
         if not payload:
             return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
         user_id = payload['user_id']
+        user = User.objects.get(id=user_id)
         try:
             data = request.data.copy()
             data['id_user'] = user_id
             serializer = LikeTopicoSerializer(data=data)
+            topico = Topico.objects.get(id=data['id_topico'])
 
             if LikeTopico.objects.filter(id_user=user_id, id_topico=data['id_topico']).exists():
                 return Response({'error': 'Você já deu like nesse tópico'}, status=status.HTTP_400_BAD_REQUEST)
-                
+
             if serializer.is_valid():
                 serializer.save()
+                Pusher.notificarLike(user.username, 'Topico', topico.id_user_id ,data['id_topico'])
+
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         
 
@@ -268,5 +273,5 @@ class list_categorias(APIView):
         })
     def get(self, request):
         categorias = CategoriaForum.objects.all()
-        categorias_data = [{'id': categoria.id, 'categoria': categoria.nome} for categoria in categorias]
+        categorias_data = [{'id': categoria.id, 'nome': categoria.nome} for categoria in categorias]
         return Response(categorias_data)

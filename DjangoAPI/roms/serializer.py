@@ -5,7 +5,7 @@ from .models import ROM, User, Conversa, Mensagem, Topico, Emulador, Categoria_J
 #rom serializer
 class ROMSerializer(serializers.ModelSerializer):
     categoria_nome = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ROM
         fields = ['title', 'description', 'categoria', 'categoria_nome','emulador', 'image', 'file']
@@ -17,7 +17,7 @@ class ROMSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'admin']
+        fields = ['id', 'username', 'email', 'password', 'admin', 'img_perfil']
         extra_kwargs = {
             'password': {'write_only': True, 'required': False},
             'admin': {'required': False},
@@ -103,7 +103,7 @@ class TopicoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Topico
-        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'categoria' ,'id_user', 'tags', 'created_at', 'updated_at', 'has_liked']
+        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'categoria' ,'id_user', 'tags', 'topico_ban', 'created_at', 'updated_at', 'has_liked']
 
     def get_has_liked(self, obj):
         id_user = self.context['request'].user.id if self.context.get('request') else None
