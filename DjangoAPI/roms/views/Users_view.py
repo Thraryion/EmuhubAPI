@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from ..models import User
 from ..serializer import UserSerializer
@@ -62,6 +63,7 @@ class UserRegister(APIView):
             201: openapi.Response("Usuário criado com sucesso", UserSerializer),
             400: "Dados inválidos"
         })        
+
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
