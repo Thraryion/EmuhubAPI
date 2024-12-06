@@ -141,7 +141,8 @@ class DeleteTopico(APIView):
         topico_id = request.data.get('topico_id')
         try:
             topico = Topico.objects.get(id=topico_id)
-            topico.delete()
+            topico.topico_delete = True
+            topico.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Topico.DoesNotExist:
             return Response({'error': 'Tópico não encontrado'}, status=status.HTTP_404_NOT_FOUND)

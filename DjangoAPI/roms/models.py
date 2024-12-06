@@ -67,6 +67,7 @@ class Topico(models.Model):
     id_categoria = models.ForeignKey('CategoriaForum', on_delete=models.CASCADE)
     id_user = models.ForeignKey('User', on_delete=models.CASCADE)
     tags = models.CharField(max_length=125, blank=True, null=True)
+    topico_delete = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -93,6 +94,7 @@ class Comentario(models.Model):
     descricao = models.TextField()
     id_topico = models.ForeignKey('Topico', on_delete=models.CASCADE)
     id_user = models.ForeignKey('User', on_delete=models.CASCADE)
+    comentario_delete = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     id_parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
