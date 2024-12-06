@@ -17,12 +17,13 @@ class ROMSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'admin', 'imagem_perfil']
+        fields = ['id', 'username', 'email', 'password', 'admin', 'imagem_perfil', 'is_active', 'is_banned']
         extra_kwargs = {
             'password': {'write_only': True, 'required': False},
             'admin': {'required': False},
             'username': {'required': False},
             'email': {'required': False},
+            'imagem_perfil': {'required': False},
         }
 
     def validate(self, data):
@@ -38,12 +39,18 @@ class UserSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        imagem_perfil = validated_data.pop('imagem_perfil', None)
+
         user = User(
             username=validated_data['username'],
             email=validated_data['email'],
             admin=validated_data.get('admin', False)
         )
         user.set_password(validated_data['password'])
+
+        if imagem_perfil:
+            user.imagem_perfil = imagem_perfil
+
         user.save()
         return user
 
@@ -56,6 +63,8 @@ class UserSerializer(serializers.ModelSerializer):
             instance.admin = validated_data['admin']
         if 'password' in validated_data:
             instance.set_password(validated_data['password'])
+        if 'imagem_perfil' in validated_data:
+            instance.imagem_perfil = validated_data['imagem_perfil']
 
         instance.save()
         return instance
