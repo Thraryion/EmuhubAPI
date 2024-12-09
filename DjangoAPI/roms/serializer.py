@@ -14,17 +14,30 @@ class ROMSerializer(serializers.ModelSerializer):
         categoria = Categoria_Jogo.objects.get(id=obj.categoria_id)
         return categoria.nome
 
+import base64
+
 class UserSerializer(serializers.ModelSerializer):
+    img_perfil = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'admin', 'imagem_perfil', 'is_active', 'is_banned']
+        fields = ['id', 'username',  'password', 'email', 'admin', 'imagem_perfil', 'img_perfil', 'is_active', 'is_banned']
         extra_kwargs = {
             'password': {'write_only': True, 'required': False},
             'admin': {'required': False},
             'username': {'required': False},
             'email': {'required': False},
-            'imagem_perfil': {'required': False},
+            'imagem_perfil': {'write_only': True, 'required': False},
         }
+
+    def get_img_perfil(self, obj):
+        if obj.imagem_perfil and obj.imagem_perfil.name:
+            try:
+                with open(obj.imagem_perfil.path, "rb") as img_file:
+                    return base64.b64encode(img_file.read()).decode('utf-8')
+            except Exception:
+                return None
+        return None
 
     def validate(self, data):
         username = data.get('username')
@@ -156,7 +169,7 @@ class ComentarioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comentario
-        fields = ['id', 'id_topico', 'id_user', 'descricao', 'comentario_delete', 'created_at', 'updated_at', 'has_liked']
+        fields = ['id', 'id_topico', 'id_user', 'descricao', 'comentario_delete', 'id_parent', 'created_at', 'updated_at', 'has_liked']
 
     def get_has_liked(self, obj):
             id_user = self.context['request'].id_user if self.context.get('request') else None
@@ -164,6 +177,7 @@ class ComentarioSerializer(serializers.ModelSerializer):
                 return False
             else:
                 return LikeComentario.objects.filter(id_comentario=obj.id, id_user=id_user).exists()
+                
 
 class DenunciaSerializer(serializers.ModelSerializer):
     class Meta:

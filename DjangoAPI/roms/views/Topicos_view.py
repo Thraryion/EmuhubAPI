@@ -182,7 +182,12 @@ class TopicoDetail(APIView):
 
 class LikeTopicoView(APIView):
     @swagger_auto_schema(
-        request_body=LikeTopicoSerializer,
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'topico_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID do topico")
+            }
+        ),
         responses={
             201: openapi.Response(
                 description="Like criado com sucesso.",

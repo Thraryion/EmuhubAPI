@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
+import base64
 
 from django.contrib.auth.hashers import check_password
 from rest_framework import status
