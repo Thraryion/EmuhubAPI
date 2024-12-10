@@ -24,7 +24,10 @@ class Auth:
             user = User.objects.get(email=email)
             if not check_password(password, user.password):
                 return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-
+            if user.is_active == False:
+                return Response({'error': 'User not active'}, status=status.HTTP_401_UNAUTHORIZED)
+            if user.is_banned == True:
+                return Response({'error': 'User banned'}, status=status.HTTP_401_UNAUTHORIZED)
             token = self.Token.create_token(user.id, user.admin, datetime.utcnow() + timedelta(minutes=60))
             refresh_token = self.Token.create_token(user.id, user.admin, datetime.utcnow() + timedelta(days=7))
 

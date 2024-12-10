@@ -9,6 +9,14 @@ class ROMSerializer(serializers.ModelSerializer):
     class Meta:
         model = ROM
         fields = ['title', 'description', 'categoria', 'categoria_nome','emulador', 'image', 'file']
+        extra_kwargs = {
+            'image': {'required': False},
+            'file': {'required': False},
+            'title': {'required': False},
+            'categoria': {'required': False},
+            'emulador': {'required': False},
+            'description': {'required': False},
+        }
 
     def get_categoria_nome(self, obj):
         categoria = Categoria_Jogo.objects.get(id=obj.categoria_id)
@@ -195,7 +203,7 @@ class TopicoDetailSerializer(serializers.ModelSerializer):
             'user': {'read_only': True},
             'has_liked': {'read_only': True},
             'likes': {'read_only': True},
-            'comentarios': {'read_only': True}
+            'comentarios': {'read_only': True},
         }
 
     def get_user(self, obj):
@@ -227,7 +235,7 @@ class ComentarioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comentario
-        fields = ['id', 'id_topico', 'id_user', 'descricao', 'comentario_delete', 'id_parent', 'created_at', 'updated_at', 'has_liked']
+        fields = ['id', 'id_topico', 'id_user', 'descricao', 'comentario_delete', 'is_helpful','id_parent', 'created_at', 'updated_at', 'has_liked']
 
     def get_has_liked(self, obj):
             id_user = self.context['request'].id_user if self.context.get('request') else None

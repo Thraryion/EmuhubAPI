@@ -82,7 +82,7 @@ class EmuladorUpdate(APIView):
 class EmuladorDelete(APIView):
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter('emulador_id', openapi.IN_QUERY, description="ID do emulador", type=openapi.TYPE_INTEGER)
+            openapi.Parameter('id', openapi.IN_QUERY, description="ID do emulador", type=openapi.TYPE_INTEGER)
         ],
         responses={
             204: openapi.Response(description="Emulador deletado com sucesso."),
@@ -98,7 +98,7 @@ class EmuladorDelete(APIView):
         if payload.get('admin') is False:
             return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
 
-        emulador_id = request.data.get('emulador_id')
+        emulador_id = request.data.get('id')
         try:
             emulador = Emulador.objects.get(id=emulador_id)
             emulador.delete()
