@@ -259,11 +259,11 @@ class ComentarioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comentario
-        fields = ['id', 'id_topico', 'id_user', 'descricao', 'user', 'is_helpful','id_parent', 'created_at', 'updated_at', 'has_liked']
+        fields = ['id', 'id_topico', 'id_user', 'descricao', 'type_content', 'user', 'is_helpful','id_parent', 'created_at', 'updated_at', 'has_liked']
         extra_kwargs = {
             'type_content': {'read_only': True},
             'has_liked': {'read_only': True},
-            'id_user': {'required': False,  'write_only': True},
+            'id_user': {'required': False},
         }
 
     def get_user(self, obj):

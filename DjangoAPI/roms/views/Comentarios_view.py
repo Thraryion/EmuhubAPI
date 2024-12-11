@@ -58,20 +58,6 @@ class ListComentarios(APIView):
         id_topico = request.GET.get('id_topico')
         comentarios = Comentario.objects.filter(id_topico=id_topico).order_by('-created_at')
         serializer = ComentarioSerializer(comentarios, many=True)
-
-        for comentario in serializer.data:
-            user = get_object_or_404(User, id=comentario['id_user'])
-
-            comentario['username'] = user.username
-
-            if user.imagem_perfil:
-                comentario['imagem_perfil'] = user.imagem_perfil
-            else:
-                comentario['imagem_perfil'] = None
-
-            likes = LikeComentario.objects.filter(id_comentario=comentario['id'])
-            comentario['likes'] = likes.count()
-
         return Response(serializer.data)
 
 class UpdateComentario(APIView):
@@ -141,7 +127,7 @@ class LikeComentarioView(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'comentario_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID do comentário")
+                'id_comentario': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID do comentário")
             }
         ),
         responses={
@@ -157,7 +143,7 @@ class LikeComentarioView(APIView):
             )
         })
     def post(self, request):
-        comentario_id = request.data.get('comentario_id')
+        comentario_id = request.data.get('id_comentario')
         comentario = Comentario.objects.get(id=comentario_id)
 
         token = request.headers.get('Authorization', '').split(' ')[1]
