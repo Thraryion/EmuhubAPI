@@ -62,5 +62,5 @@ urlpatterns = [
     path("mensagens/create/", MensagemCreate.as_view(), name="mensagem-create"),
     path("denuncia/create/", CreateDenuncia.as_view(), name="denuncia-create"),
     path("denuncia/list/", List_Denuncia.as_view(), name="denuncia-list"),
-    path("banned/", banned_User.as_view(), name="banned-user")
+    path("denuncia/banned/", banned_User.as_view(), name="banned-user")
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

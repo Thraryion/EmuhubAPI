@@ -6,3 +6,6 @@ from datetime import datetime, timedelta
 
 from ..Classes.token import Token
 from ..models import Denuncia, Topico, Comentario, User
+
+class DenunciaTest(APITestCase):
+    
