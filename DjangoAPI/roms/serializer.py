@@ -254,10 +254,28 @@ class TopicoDetailSerializer(serializers.ModelSerializer):
 
 class ComentarioSerializer(serializers.ModelSerializer):
     has_liked = serializers.SerializerMethodField()
+    type_content = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
 
     class Meta:
         model = Comentario
-        fields = ['id', 'id_topico', 'id_user', 'descricao', 'comentario_delete', 'is_helpful','id_parent', 'created_at', 'updated_at', 'has_liked']
+        fields = ['id', 'id_topico', 'id_user', 'descricao', 'comentario_delete', 'user', 'is_helpful','id_parent', 'created_at', 'updated_at', 'has_liked']
+        extra_kwargs = {
+            'comentario_delete': {'required': False},
+            'type_content': {'read_only': True},
+            'has_liked': {'read_only': True},
+            'id_user': {'required': False,  'write_only': True},
+        }
+
+    def get_user(self, obj):
+        user = User.objects.get(id=obj.id_user.id)
+        return UserSerializer(user).data
+
+    def get_type_content(self, obj):
+        if obj.id_parent is None:
+            return 'topico'
+        else:
+            return 'comentario'
 
     def get_has_liked(self, obj):
             id_user = self.context['request'].id_user if self.context.get('request') else None
