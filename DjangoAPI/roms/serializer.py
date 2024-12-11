@@ -150,7 +150,7 @@ class TopicoSerializer(serializers.ModelSerializer):
             'likes': {'read_only': True},
             'comentarios': {'read_only': True},
             'img_topico': {'write_only': True},
-            'img_topico64': {'read_only': True},'
+            'img_topico64': {'read_only': True},
         }
 
     def get_user(self, obj):
