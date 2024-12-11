@@ -140,7 +140,7 @@ class TopicoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Topico
-        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'categoria', 'id_user', 'user', 'comentarios', 'likes', 'tags', 'topico_delete', 'created_at', 'updated_at', 'has_liked']
+        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'categoria', 'id_user', 'user', 'comentarios', 'likes', 'tags', 'created_at', 'updated_at', 'has_liked']
         extra_kwargs = {
             'id_categoria': {'write_only': True},
             'categoria': {'read_only': True},
@@ -206,7 +206,7 @@ class TopicoDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Topico
-        fields = ['id', 'titulo', 'img_topico', 'img_topico64', 'descricao', 'id_categoria', 'categoria', 'id_user', 'user', 'qtd_comentarios', 'likes', 'tags', 'topico_delete', 'created_at', 'updated_at', 'has_liked']
+        fields = ['id', 'titulo', 'img_topico', 'img_topico64', 'descricao', 'id_categoria', 'categoria', 'id_user', 'user', 'qtd_comentarios', 'likes', 'tags', 'created_at', 'updated_at', 'has_liked']
         extra_kwargs = {
             'id_categoria': {'write_only': True},
             'categoria': {'read_only': True},
