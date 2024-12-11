@@ -157,7 +157,7 @@ class LikeComentarioView(APIView):
             )
         })
     def post(self, request):
-        comentario_id = request.data.get('id_comentario')
+        comentario_id = request.data.get('comentario_id')
         comentario = Comentario.objects.get(id=comentario_id)
 
         token = request.headers.get('Authorization', '').split(' ')[1]

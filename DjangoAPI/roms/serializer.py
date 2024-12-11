@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import ROM, User, Conversa, Mensagem, Topico, Emulador, Categoria_Jogo, Comentario, LikeComentario, LikeTopico, CategoriaForum, Denuncia
-
+import base64
 
 #rom serializer
 class ROMSerializer(serializers.ModelSerializer):
@@ -9,12 +9,18 @@ class ROMSerializer(serializers.ModelSerializer):
     class Meta:
         model = ROM
         fields = ['title', 'description', 'categoria', 'categoria_nome','emulador', 'image', 'file']
+        extra_kwargs = {
+            'image': {'required': False},
+            'file': {'required': False},
+            'title': {'required': False},
+            'categoria': {'required': False},
+            'emulador': {'required': False},
+            'description': {'required': False},
+        }
 
     def get_categoria_nome(self, obj):
         categoria = Categoria_Jogo.objects.get(id=obj.categoria_id)
         return categoria.nome
-
-import base64
 
 class UserSerializer(serializers.ModelSerializer):
     img_perfil = serializers.SerializerMethodField()
@@ -119,13 +125,54 @@ class ConversaDetailSerializer(serializers.ModelSerializer):
         fields = ['id', 'mensagens', 'created_at', 'updated_at']
 
 #Forum serializers
+class CategoriaForumSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CategoriaForum
+        fields = ['id', 'nome']
+
 class TopicoSerializer(serializers.ModelSerializer):
     has_liked = serializers.SerializerMethodField()
     categoria = serializers.SerializerMethodField()
+    img_topico64 = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
+    comentarios = serializers.SerializerMethodField()
+    likes = serializers.SerializerMethodField()
 
     class Meta:
         model = Topico
-        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'categoria' ,'id_user', 'tags', 'topico_delete', 'created_at', 'updated_at', 'has_liked']
+        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'categoria', 'id_user', 'user', 'comentarios', 'likes', 'tags', 'topico_delete', 'created_at', 'updated_at', 'has_liked']
+        extra_kwargs = {
+            'id_categoria': {'write_only': True},
+            'categoria': {'read_only': True},
+            'id_user': {'write_only': True},
+            'user': {'read_only': True},
+            'has_liked': {'read_only': True},
+            'likes': {'read_only': True},
+            'comentarios': {'read_only': True},
+            'img_topico': {'write_only': True},
+            'img_topico64': {'read_only': True},'
+        }
+
+    def get_user(self, obj):
+        user = User.objects.get(id=obj.id_user.id)
+        return UserSerializer(user).data
+    
+    def get_likes(self, obj):
+        likes = LikeTopico.objects.filter(id_topico=obj.id).count()
+        return likes
+    
+    def get_comentarios(self, obj):
+        comentarios = Comentario.objects.filter(id_topico=obj.id, comentario_delete=False).count()
+        return comentarios
+
+    def get_img_topico64(self, obj):
+        if obj.img_topico and obj.img_topico.name:
+            try:
+                with open(obj.img_topico.path, "rb") as img_file:
+                    return base64.b64encode(img_file.read()).decode('utf-8')
+            except Exception:
+                return None
+        return None
 
     def get_has_liked(self, obj):
         id_user = self.context['request'].user.id if self.context.get('request') else None
@@ -137,7 +184,7 @@ class TopicoSerializer(serializers.ModelSerializer):
 
     def get_categoria(self, obj):
         categoria = CategoriaForum.objects.get(id=obj.id_categoria.id)
-        return categoria.nome 
+        return CategoriaForumSerializer(categoria).data
         
 class LikeTopicoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -151,25 +198,66 @@ class LikeComentarioSerializer(serializers.ModelSerializer):
 
 class TopicoDetailSerializer(serializers.ModelSerializer):
     has_liked = serializers.SerializerMethodField()
+    categoria = serializers.SerializerMethodField()
+    img_topico64 = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
+    qtd_comentarios = serializers.SerializerMethodField()
+    likes = serializers.SerializerMethodField()
 
     class Meta:
         model = Topico
-        fields = ['id', 'titulo', 'img_topico', 'descricao', 'id_categoria', 'id_user', 'tags', 'created_at', 'updated_at', "has_liked"]
+        fields = ['id', 'titulo', 'img_topico', 'img_topico64', 'descricao', 'id_categoria', 'categoria', 'id_user', 'user', 'qtd_comentarios', 'likes', 'tags', 'topico_delete', 'created_at', 'updated_at', 'has_liked']
+        extra_kwargs = {
+            'id_categoria': {'write_only': True},
+            'categoria': {'read_only': True},
+            'id_user': {'write_only': True},
+            'user': {'read_only': True},
+            'has_liked': {'read_only': True},
+            'likes': {'read_only': True},
+            'comentarios': {'read_only': True},
+            'img_topico': {'write_only': True},
+            'img_topico64': {'read_only': True},
+        }
+
+    def get_user(self, obj):
+        user = User.objects.get(id=obj.id_user.id)
+        return UserSerializer(user).data
+    
+    def get_likes(self, obj):
+        likes = LikeTopico.objects.filter(id_topico=obj.id).count()
+        return likes
+    
+    def get_qtd_comentarios(self, obj):
+        comentarios = Comentario.objects.filter(id_topico=obj.id, comentario_delete=False)
+        return ComentarioSerializer(comentarios, many=True).data
+
+    def get_img_topico64(self, obj):
+        if obj.img_topico and obj.img_topico.name:
+            try:
+                with open(obj.img_topico.path, "rb") as img_file:
+                    return base64.b64encode(img_file.read()).decode('utf-8')
+            except Exception:
+                return None
+        return None
 
     def get_has_liked(self, obj):
-            id_user = self.context['request'].user.id if self.context.get('request') else None
-            
-            if id_user is None:
-                return False
-            else:
-                return LikeTopico.objects.filter(id_topico=obj.id, id_user=id_user).exists()
+        id_user = self.context['request'].user.id if self.context.get('request') else None
+        
+        if id_user is None:
+            return False
+        else:
+            return LikeTopico.objects.filter(id_topico=obj.id, id_user=id_user).exists()
+
+    def get_categoria(self, obj):
+        categoria = CategoriaForum.objects.get(id=obj.id_categoria.id)
+        return CategoriaForumSerializer(categoria).data
 
 class ComentarioSerializer(serializers.ModelSerializer):
     has_liked = serializers.SerializerMethodField()
 
     class Meta:
         model = Comentario
-        fields = ['id', 'id_topico', 'id_user', 'descricao', 'comentario_delete', 'id_parent', 'created_at', 'updated_at', 'has_liked']
+        fields = ['id', 'id_topico', 'id_user', 'descricao', 'comentario_delete', 'is_helpful','id_parent', 'created_at', 'updated_at', 'has_liked']
 
     def get_has_liked(self, obj):
             id_user = self.context['request'].id_user if self.context.get('request') else None

@@ -58,7 +58,7 @@ class EmuladorTests(APITestCase):
     def test_delete_emulador(self):
         url = reverse('emulador-delete')
         data = {
-            "emulador_id": self.emulador.id
+            "id": self.emulador.id
         }
         response = self.client.delete(url, data, HTTP_AUTHORIZATION=f'Bearer {self.token}')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)

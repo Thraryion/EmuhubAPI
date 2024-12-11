@@ -62,22 +62,9 @@ class ListTopicos(APIView):
             )
         })
     def get(self, request):
-        topicos = Topico.objects.filter(topico_delete=False).order_by('-created_at')
+        topicos_obj = Topico.objects.filter(topico_delete=False).order_by('-created_at')
         
-        serializer = TopicoSerializer(topicos, many=True, context={'request': request})
-
-        for topico_data in serializer.data:
-            user = get_object_or_404(User, id=topico_data['id_user'])
-
-            topico_data['username'] = user.username
-            
-            if user.imagem_perfil:
-                topico_data['imagem_perfil'] = user.imagem_perfil
-            else:
-                topico_data['imagem_perfil'] = None
-
-            likes = LikeTopico.objects.filter(id_topico=topico_data['id'])
-            topico_data['likes'] = likes.count()
+        serializer = TopicoSerializer(topicos_obj, many=True, context={'request': request})
         
         return Response(serializer.data)
 

@@ -68,7 +68,7 @@ class ComentarioTests(APITestCase):
     def test_like_comentario(self):
         url = reverse('comentario-like')
         data = {
-            "id_comentario": self.comentario.id
+            "id": self.comentario.id
         }
         response = self.client.post(url, data, HTTP_AUTHORIZATION=f'Bearer {self.token}')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
