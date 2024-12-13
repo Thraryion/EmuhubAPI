@@ -84,3 +84,39 @@ class banned_User(APIView):
             return Response(status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+class uptade_status(APIView):
+    @swagger_auto_schema(
+        request = openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "status": openapi.Schema(type=openapi.TYPE_STRING, description="O status da denúncia"),
+                "denuncia_id": openapi.Schema(type=openapi.TYPE_INTEGER, description="ID da denúncia"),
+                "resolution": openapi.Schema(type=openapi.TYPE_STRING, description="Resolução da denúncia"),
+            },
+            required=["status", "denuncia_id"]
+        ),
+        responses={
+            200: "Status da denúncia atualizado com sucesso",
+            400: "Dados inválidos",
+            401: "Não autorizado",
+            404: "Denúncia não encontrada"
+        })
+    def post(self, request):
+        token = request.headers.get('Authorization', '').split(' ')[1]
+        payload = Token.decode_token(token)
+        if payload is None:
+            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+        if payload.get('admin') is False:
+            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
+        denuncia_id = request.data.get('denuncia_id')
+        status = request.data.get('status')
+        resolution = request.data.get('resolution')
+        try:
+            denuncia = Denuncia.objects.get(id=denuncia_id)
+            denuncia.status = status
+            denuncia.resolution = resolution
+            denuncia.save()
+            return Response(status=status.HTTP_200_OK)
+        except Denuncia.DoesNotExist:
+            return Response({'error': 'Denuncia not found'}, status=status.HTTP_404_NOT_FOUND)

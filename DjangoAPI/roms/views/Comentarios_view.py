@@ -8,7 +8,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import logging
 
-from ..models import Comentario, LikeComentario, User
+from ..models import Comentario, LikeComentario, User, Topico
 from ..serializer import ComentarioSerializer, LikeComentarioSerializer
 from ..Classes.token import Token
 from ..Classes.notificacoes import PusherClient
@@ -34,14 +34,39 @@ class CreateComentario(APIView):
         payload = Token.decode_token(token)
         if not payload:
             return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-        user_id = payload['user_id']
+        user_id = payload.get('user_id')
+        user = get_object_or_404(User, id=user_id)
+
+        # Validação do campo id_topico
+        topico_id = request.data.get('id_topico')
+        if not topico_id:
+            return Response({'error': 'O campo id_topico é obrigatório.'}, status=status.HTTP_400_BAD_REQUEST)
+
         data = request.data.copy()
+        id_user_comentario = None
+
+        if data.get('id_parent'):
+            comentario = get_object_or_404(Comentario, id=data['id_parent'])
+            id_user_comentario = comentario.id_user
+        else:
+            topico = get_object_or_404(Topico, id=topico_id)
+            id_user_comentario = topico.id_user
+
         data['id_user'] = user_id
         serializer = ComentarioSerializer(data=data)
+
         if serializer.is_valid():
             serializer.save()
+
+            try:
+                Pusher.notificarComentario(user.username, topico_id, id_user_comentario)
+            except Exception as e:
+                logging.error(f"Erro ao enviar notificação: {e}")
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'error': 'Dados inválidos.', 'detalhes': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ListComentarios(APIView):
     @swagger_auto_schema(
