@@ -8,7 +8,7 @@ from .views import (
                     CreateComentario, UpdateComentario, ListComentarios, DeleteComentario, ComentarioIsHelpful, LikeComentarioView, UnlikeComentarioView,
                     MensagemCreate, ConversaCreate, Detail_Conversa, List_Conversas,
                     SearchRom, SearchTopico,
-                    CreateDenuncia, List_Denuncia, banned_User
+                    CreateDenuncia, List_Denuncia, banned_User, update_status
                 )
 from django.conf.urls.static import static
 from django.conf import settings
@@ -62,5 +62,6 @@ urlpatterns = [
     path("mensagens/create/", MensagemCreate.as_view(), name="mensagem-create"),
     path("denuncia/create/", CreateDenuncia.as_view(), name="denuncia-create"),
     path("denuncia/list/", List_Denuncia.as_view(), name="denuncia-list"),
-    path("denuncia/banned/", banned_User.as_view(), name="banned-user")
+    path("denuncia/banned/", banned_User.as_view(), name="banned-user"),
+    path("denuncia/update/", update_status.as_view(), name="update-status"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
