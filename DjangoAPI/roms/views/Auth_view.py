@@ -98,3 +98,5 @@ class ResetPassword(APIView):
         password = request.data.get('password')
         response = Auth.reset_password(token, password)
         return response
+
+        

@@ -67,7 +67,7 @@ class Auth:
             <a href="http://52.45.165.140:5173/reset-password?token={token}">Clique aqui</a>'''
 
             msg = MIMEMultipart()
-            msg['From'] = settings.EMAIL_HOST_USERail.outlook.com
+            msg['From'] = settings.EMAIL_HOST_USER
             msg['To'] = email
             msg['Subject'] = subject
             msg.attach(MIMEText(message, 'html'))

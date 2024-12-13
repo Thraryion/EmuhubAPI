@@ -13,3 +13,7 @@ class PusherClient:
     def notificarLike(self, username, content_nome, id_user, id_content):
         self.pusher_client.trigger(f'like-channel-{id_user}', 'like-event', {'message': f'{username} deu like no seu {content_nome}',
                                                                   'id_content': id_content,})
+
+    def notificarComentario(self, username, id_user, id_content):
+        self.pusher_client.trigger(f'comentario-channel-{id_user}', 'comentario-event', {'message': f'{username} comentou no seu post',
+                                                                  'id_content': id_content,})
