@@ -138,7 +138,6 @@ class TopicoDetail(APIView):
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter('topico_id', openapi.IN_QUERY, description="ID do tópico", type=openapi.TYPE_INTEGER),
-            openapi.Parameter('id_user', openapi.IN_QUERY, description="ID do usuário", type=openapi.TYPE_INTEGER)
         ],
         responses={
             200: openapi.Response(
@@ -151,19 +150,9 @@ class TopicoDetail(APIView):
         })
     def get(self, request, topico_id):
         try:
-            topico = Topico.objects.get(id=topico_id)
+            topico = Topico.objects.filter(id=topico_id, topico_delete=False)
             serializer = TopicoSerializer(topico, many=True, context={'request': request})
-
-            img_perfil = User.objects.get(id=topico.id_user).img_perfil
-            username = User.objects.get(id=topico.id_user).username
-            likes = LikeTopico.objects.filter(topico_id=topico_id).count()
-            data = serializer.data
-
-            data['img_perfil'] = img_perfil
-            data['username'] = username
-            data['likes'] = likes
-
-            return Response(data)
+            return {serializer.data}
         except Topico.DoesNotExist:
             raise Http404("Tópico não encontrado")
 
