@@ -241,12 +241,10 @@ class TopicoDetailSerializer(serializers.ModelSerializer):
         return None
 
     def get_has_liked(self, obj):
-        id_user = self.context['request'].user.id if self.context.get('request') else None
-        
-        if id_user is None:
+        if obj.id_user is None:
             return False
         else:
-            return LikeTopico.objects.filter(id_topico=obj.id, id_user=id_user).exists()
+            return LikeTopico.objects.filter(id_topico=obj.id, id_user=obj.id_user).exists()
 
     def get_categoria(self, obj):
         categoria = CategoriaForum.objects.get(id=obj.id_categoria.id)
@@ -277,11 +275,10 @@ class ComentarioSerializer(serializers.ModelSerializer):
             return 'comentario'
 
     def get_has_liked(self, obj):
-            id_user = self.context['request'].id_user if self.context.get('request') else None
-            if id_user is None:
-                return False
-            else:
-                return LikeComentario.objects.filter(id_comentario=obj.id, id_user=id_user).exists()
+        if obj.id_user is None:
+            return False
+        else:
+            return LikeTopico.objects.filter(id_topico=obj.id, id_user=obj.id_user).exists()
                 
 
 class DenunciaSerializer(serializers.ModelSerializer):
