@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 
 from ..Classes.wishlist import Wishlist
 from ..Classes.token import Token
-from ..models import Denuncia, User
+from ..models import Denuncia, User, Topico, Comentario
 from ..serializer import DenunciaSerializer
 
 Token = Token()
@@ -27,14 +27,41 @@ class CreateDenuncia(APIView):
             return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
         if payload.get('admin') is False:
             return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
+        data = request.data.copy()
+        
         try:
-            serializer = DenunciaSerializer(data=request.data)
+            content_type_str = data.get('content_type')
+            content_id = data.get('content_id')
+            
+            if not content_type_str or not content_id:
+                return Response({'error': 'Campos content_type e content_id são obrigatórios.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                model_class = {
+                    'post': Post,
+                    'comentario': Comentario
+                }.get(content_type_str.lower())
+                
+                if not model_class:
+                    return Response({'error': 'Tipo de conteúdo inválido.'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                content_type = ContentType.objects.get_for_model(model_class)
+                data['content_type'] = content_type.id
+
+            except ContentType.DoesNotExist:
+                return Response({'error': 'Tipo de conteúdo não encontrado.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            if not model_class.objects.filter(id=content_id).exists():
+                return Response({'error': 'Objeto associado ao content_id não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+            
+            serializer = DenunciaSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
         except Exception as e:
-            logger.error(f"Erro ao criar denúncia: {e}")
+            logger.error(f"Erro ao criar denúncia: {str(e)}")
             return Response({'error': 'Erro interno do servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class List_Denuncia(APIView):
@@ -85,7 +112,7 @@ class banned_User(APIView):
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
-class uptade_status(APIView):
+class update_status(APIView):
     @swagger_auto_schema(
         request = openapi.Schema(
             type=openapi.TYPE_OBJECT,
