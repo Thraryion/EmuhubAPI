@@ -12,6 +12,7 @@ from django.db.models import Q
 from ..models import Topico, ROM, Categoria_Jogo, CategoriaForum
 from ..serializer import TopicoSerializer, ROMSerializer
 from ..Classes.token import Token
+from ..Classes.Roms import Roms
 
 logger = logging.getLogger(__name__)
 Token = Token()
@@ -122,15 +123,7 @@ class SearchRom(APIView):
         search = request.GET.get('search')
         if not search:
             return Response({"detail": "Nenhum termo de busca fornecido."}, status=400)
-        try:
-            roms = ROM.objects.filter(
-                Q(title__icontains=search) |
-                Q(description__icontains=search) |
-                Q(categoria__nome__icontains=search) |
-                Q(emulador__nome__icontains=search)
-            ).distinct()
-            serializer_roms = ROMSerializer(roms, many=True)
-            return Response({'roms': serializer_roms.data})
-        except Exception as e:
-            logger.error(f"Erro ao buscar dados: {e}")
-            return Response({'error': 'Erro interno do servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        roms = Roms()
+        data = roms.search(search)
+
+        return Response(data)

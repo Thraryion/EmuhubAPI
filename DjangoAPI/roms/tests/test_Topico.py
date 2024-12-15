@@ -110,3 +110,10 @@ class TopicoAPITests(APITestCase):
     def test_list_categoria(self):
         response = self.client.get(reverse('topico-categorias'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+    
+    def test_topico_detail(self):
+        url = reverse('topico-detail') + f"?topico_id={self.topico.id}"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["titulo"], self.topico.titulo)
+        self.assertEqual(response.data["descricao"], self.topico.descricao)
