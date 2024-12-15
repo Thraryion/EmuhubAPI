@@ -175,12 +175,10 @@ class TopicoSerializer(serializers.ModelSerializer):
         return None
 
     def get_has_liked(self, obj):
-        id_user = self.context['request'].user.id if self.context.get('request') else None
-        
-        if id_user is None:
+        user_id = self.context.get('user_id')
+        if not user_id:
             return False
-        else:
-            return LikeTopico.objects.filter(id_topico=obj.id, id_user=id_user).exists()
+        return LikeTopico.objects.filter(id_topico=obj.id, id_user=user_id).exists()
 
     def get_categoria(self, obj):
         categoria = CategoriaForum.objects.get(id=obj.id_categoria.id)
@@ -241,10 +239,10 @@ class TopicoDetailSerializer(serializers.ModelSerializer):
         return None
 
     def get_has_liked(self, obj):
-        if obj.id_user is None:
+        user_id = self.context.get('user_id')
+        if not user_id:
             return False
-        else:
-            return LikeTopico.objects.filter(id_topico=obj.id, id_user=obj.id_user).exists()
+        return LikeTopico.objects.filter(id_topico=obj.id, id_user=user_id).exists()
 
     def get_categoria(self, obj):
         categoria = CategoriaForum.objects.get(id=obj.id_categoria.id)

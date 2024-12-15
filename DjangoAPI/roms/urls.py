@@ -16,7 +16,7 @@ from django.conf import settings
 urlpatterns = [
     path("roms/", ROMListView.as_view(), name="rom-list"),
     path("roms/detail/", ROMDetailView.as_view(), name="rom-detail"),
-    path("roms/search", SearchRom.as_view(), name="search-rom"),
+    path("roms/search/", SearchRom.as_view(), name="search-rom"),
     path('roms/mostplayed/', MostPlayed.as_view(), name='rom-mostplayed'),
     path("roms/<str:empresa>/<str:emulador_name>/<str:game_name>/download/", ROMDownload.as_view(), name="rom-download"),
     path("roms/update/", ROMUpdate.as_view(), name="rom-update"),
@@ -46,7 +46,7 @@ urlpatterns = [
     path("topicos/delete/", DeleteTopico.as_view(), name="topico-delete"),
     path("topicos/detail/", TopicoDetail.as_view(), name="topico-detail"),
     path("topicos/categorias/", list_categorias.as_view(), name="topico-categorias"),
-    path("topicos/search", SearchTopico.as_view(), name="search-topico"),
+    path("topicos/search/", SearchTopico.as_view(), name="search-topico"),
     path("comentarios/create/", CreateComentario.as_view(), name="comentario-create"),
     path("comentarios/update/", UpdateComentario.as_view(), name="comentario-update"),
     path("comentarios/list/", ListComentarios.as_view(), name="comentario-list"),

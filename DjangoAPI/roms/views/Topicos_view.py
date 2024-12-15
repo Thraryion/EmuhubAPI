@@ -63,8 +63,9 @@ class ListTopicos(APIView):
         })
     def get(self, request):
         topicos_obj = Topico.objects.filter(topico_delete=False).order_by('-created_at')
+        user_id = request.GET.get('id_user')
         
-        serializer = TopicoSerializer(topicos_obj, many=True, context={'request': request})
+        serializer = TopicoSerializer(topicos_obj, many=True, context={'id_user': user_id})
         
         return Response(serializer.data)
 
@@ -148,13 +149,22 @@ class TopicoDetail(APIView):
                 description="Tópico não encontrado."
             )
         })
-    def get(self, request, topico_id):
+    def get(self, request):
+        topico_id = request.query_params.get('topico_id')
+        token = request.headers.get('Authorization', '').split(' ')[1]
+
+        if token:
+            payload = Token.decode_token(token)
+            user_id = payload.get('user_id')
+        else:
+            user_id = None
+
         try:
-            topico = Topico.objects.filter(id=topico_id, topico_delete=False)
-            serializer = TopicoSerializer(topico, many=True, context={'request': request})
-            return {serializer.data}
-        except Topico.DoesNotExist:
-            raise Http404("Tópico não encontrado")
+            topico = Topico.objects.get(id=topico_id)
+            serializer = TopicoSerializer(topico, context={'user_id': user_id})
+            return Response(serializer.data)
+        except:
+            return Response({'error': 'Tópico não encontrado'}, status=status.HTTP_404_NOT_FOUND) 
 
 class LikeTopicoView(APIView):
     @swagger_auto_schema(
