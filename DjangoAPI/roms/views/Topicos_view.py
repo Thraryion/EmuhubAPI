@@ -151,20 +151,24 @@ class TopicoDetail(APIView):
         })
     def get(self, request):
         topico_id = request.query_params.get('topico_id')
-        token = request.headers.get('Authorization', '').split(' ')[1]
+        token = request.headers.get('Authorization', '').split(' ')[1] if 'Authorization' in request.headers else None
 
+        logger.info(f"Token recebido: {token}")
+        user_id = None
         if token:
             payload = Token.decode_token(token)
-            user_id = payload.get('user_id')
-        else:
-            user_id = None
+            logger.info(f"Payload decodificado: {payload}")
+            if payload and isinstance(payload, dict):
+                user_id = payload.get('user_id')
 
         try:
             topico = Topico.objects.get(id=topico_id)
             serializer = TopicoSerializer(topico, context={'user_id': user_id})
             return Response(serializer.data)
-        except:
-            return Response({'error': 'Tópico não encontrado'}, status=status.HTTP_404_NOT_FOUND) 
+        except Topico.DoesNotExist:
+            logger.error(f"Tópico com ID {topico_id} não encontrado")
+            return Response({'error': 'Tópico não encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
 
 class LikeTopicoView(APIView):
     @swagger_auto_schema(
