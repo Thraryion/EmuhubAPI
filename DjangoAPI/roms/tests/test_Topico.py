@@ -112,8 +112,14 @@ class TopicoAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
     def test_topico_detail(self):
+        url_like = reverse('topico-like')
+        data = {
+            "id_topico": self.topico.id,
+        }
+        response_like = self.client.post(url_like, data, HTTP_AUTHORIZATION=f'Bearer {self.token}')
+
         url = reverse('topico-detail') + f"?topico_id={self.topico.id}"
-        response = self.client.get(url)
+        response = self.client.get(url, HTTP_AUTHORIZATION=f'Bearer {self.token}')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["titulo"], self.topico.titulo)
         self.assertEqual(response.data["descricao"], self.topico.descricao)

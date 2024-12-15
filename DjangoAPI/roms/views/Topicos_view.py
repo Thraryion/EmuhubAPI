@@ -11,7 +11,7 @@ import logging
 from ..Classes.notificacoes import PusherClient
 from ..Classes.token import Token
 from ..models import Topico, LikeTopico, User, CategoriaForum
-from ..serializer import TopicoSerializer, LikeTopicoSerializer
+from ..serializer import TopicoSerializer, LikeTopicoSerializer, TopicoDetailSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -163,7 +163,7 @@ class TopicoDetail(APIView):
 
         try:
             topico = Topico.objects.get(id=topico_id)
-            serializer = TopicoSerializer(topico, context={'user_id': user_id})
+            serializer = TopicoDetailSerializer(topico, context={'user_id': user_id})
             return Response(serializer.data)
         except Topico.DoesNotExist:
             logger.error(f"Tópico com ID {topico_id} não encontrado")
