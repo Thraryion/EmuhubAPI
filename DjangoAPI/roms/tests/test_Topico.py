@@ -51,7 +51,6 @@ class TopicoAPITests(APITestCase):
             )
         url = reverse('topico-list') + f"?id_user={self.user.id}"
         response = self.client.get(self.list_url)
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update_topico(self):

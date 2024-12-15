@@ -4,6 +4,7 @@ from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.shortcuts import get_object_or_404
+import logging
 
 from ..Classes.wishlist import Wishlist
 from ..Classes.token import Token
@@ -11,6 +12,7 @@ from ..models import Denuncia, User, Topico, Comentario
 from ..serializer import DenunciaSerializer
 
 Token = Token()
+logger = logging.getLogger(__name__)
 
 class CreateDenuncia(APIView):
     @swagger_auto_schema(
