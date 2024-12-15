@@ -166,7 +166,7 @@ class TopicoSerializer(serializers.ModelSerializer):
         return comentarios
 
     def get_img_topico64(self, obj):
-        if obj.img_topico and obj.img_topico.name:
+        if obj.img_topico:
             try:
                 with open(obj.img_topico.path, "rb") as img_file:
                     return base64.b64encode(img_file.read()).decode('utf-8')
@@ -230,7 +230,7 @@ class TopicoDetailSerializer(serializers.ModelSerializer):
         return ComentarioSerializer(comentarios, many=True).data
 
     def get_img_topico64(self, obj):
-        if obj.img_topico and obj.img_topico.name:
+        if obj.img_topico:
             try:
                 with open(obj.img_topico.path, "rb") as img_file:
                     return base64.b64encode(img_file.read()).decode('utf-8')
