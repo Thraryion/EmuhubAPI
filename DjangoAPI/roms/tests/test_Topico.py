@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.urls import reverse
-from ..models import Topico, User, CategoriaForum, LikeTopico
+from ..models import Topico, User, CategoriaForum, LikeTopico, Comentario
 from ..Classes.token import Token
 from datetime import datetime, timedelta
 
@@ -123,3 +123,41 @@ class TopicoAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["titulo"], self.topico.titulo)
         self.assertEqual(response.data["descricao"], self.topico.descricao)
+
+    def test_coment_alin_topico_detail(self):
+        for _ in range(3):
+            Comentario.objects.create(
+                id_user=self.user,
+                id_topico=self.topico,
+                descricao="test comentario",
+                id_parent=None
+            )
+        
+        parent_comment = Comentario.objects.filter(id_parent=None).first()
+        for _ in range(3):
+            Comentario.objects.create(
+                id_user=self.user,
+                id_topico=self.topico,
+                descricao="test comentario",
+                id_parent=parent_comment
+            )
+        
+        second_level_comment = Comentario.objects.filter(id_parent=parent_comment).first()
+        for _ in range(3):
+            Comentario.objects.create(
+                id_user=self.user,
+                id_topico=self.topico,
+                descricao="test comentario",
+                id_parent=second_level_comment
+            )
+        
+        url = reverse('topico-detail') + f"?topico_id={self.topico.id}"
+        response = self.client.get(url, HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        print(response.data)
+        self.assertEqual(response.status_code, 200)
+        
+        comentarios = response.data['obj_comentarios']
+        self.assertEqual(len(comentarios), 3) 
+
+        primeiro_comentario = Comentario.objects.get(id=comentarios[0]['id'])
+        self.assertEqual(primeiro_comentario.replies.count(), 3)

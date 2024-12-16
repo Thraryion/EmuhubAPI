@@ -223,8 +223,9 @@ class TopicoDetailSerializer(serializers.ModelSerializer):
         return UserSerializer(user).data
 
     def get_obj_comentarios(self, obj):
-        comentarios = Comentario.objects.filter(id_topico=obj.id, comentario_delete=False)
-        return ComentarioSerializer(comentarios, many=True).data
+        user_id = self.context.get('user_id')
+        comentarios = Comentario.objects.filter(id_topico=obj.id, comentario_delete=False, id_parent__isnull=True)
+        return ComentarioSerializer(comentarios, context={'user_id': user_id}, many=True).data
     
     def get_likes(self, obj):
         likes = LikeTopico.objects.filter(id_topico=obj.id).count()
@@ -257,10 +258,11 @@ class ComentarioSerializer(serializers.ModelSerializer):
     has_liked = serializers.SerializerMethodField()
     type_content = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()
+    children = serializers.SerializerMethodField()
 
     class Meta:
         model = Comentario
-        fields = ['id', 'id_topico', 'id_user', 'descricao', 'type_content', 'user', 'is_helpful','id_parent', 'created_at', 'updated_at', 'has_liked']
+        fields = ['id', 'id_topico', 'id_user', 'descricao', 'type_content', 'user', 'is_helpful', 'id_parent', 'created_at', 'updated_at', 'has_liked', 'children']
         extra_kwargs = {
             'type_content': {'read_only': True},
             'has_liked': {'read_only': True},
@@ -278,10 +280,14 @@ class ComentarioSerializer(serializers.ModelSerializer):
             return 'comentario'
 
     def get_has_liked(self, obj):
-        if obj.id_user is None:
+        user_id = self.context.get('user_id')
+        if not user_id:
             return False
-        else:
-            return LikeTopico.objects.filter(id_topico=obj.id, id_user=obj.id_user).exists()
+        return LikeTopico.objects.filter(id_topico=obj.id, id_user=user_id).exists()
+
+    def get_children(self, obj):
+        children = obj.replies.all()
+        return ComentarioSerializer(children, many=True, context=self.context).data
                 
 
 class DenunciaSerializer(serializers.ModelSerializer):
