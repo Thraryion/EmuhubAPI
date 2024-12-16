@@ -127,21 +127,23 @@ class banned_User(APIView):
 
 class update_status(APIView):
     @swagger_auto_schema(
-        request = openapi.Schema(
+        operation_description="Atualiza o status de uma denúncia",
+        request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                "status": openapi.Schema(type=openapi.TYPE_STRING, description="O status da denúncia"),
-                "denuncia_id": openapi.Schema(type=openapi.TYPE_INTEGER, description="ID da denúncia"),
-                "resolution": openapi.Schema(type=openapi.TYPE_STRING, description="Resolução da denúncia"),
+                'status': openapi.Schema(type=openapi.TYPE_STRING, description="O status da denúncia"),
+                'denuncia_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID da denúncia"),
+                'resolution': openapi.Schema(type=openapi.TYPE_STRING, description="Resolução da denúncia")
             },
-            required=["status", "denuncia_id"]
+            required=['status', 'denuncia_id']
         ),
         responses={
-            200: "Status da denúncia atualizado com sucesso",
-            400: "Dados inválidos",
-            401: "Não autorizado",
-            404: "Denúncia não encontrada"
-        })
+            200: openapi.Response('Status da denúncia atualizado com sucesso'),
+            400: openapi.Response('Dados inválidos'),
+            401: openapi.Response('Não autorizado'),
+            404: openapi.Response('Denúncia não encontrada')
+        }
+    )
     def post(self, request):
         token = request.headers.get('Authorization', '').split(' ')[1]
         payload = Token.decode_token(token)

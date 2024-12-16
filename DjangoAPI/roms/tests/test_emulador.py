@@ -61,4 +61,5 @@ class EmuladorTests(APITestCase):
             "id": self.emulador.id
         }
         response = self.client.delete(url, data, HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
