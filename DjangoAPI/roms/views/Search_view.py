@@ -67,7 +67,7 @@ class SearchTopico(APIView):
                 Q(titulo__icontains=search) |
                 Q(descricao__icontains=search) |
                 Q(id_categoria__nome__icontains=search) |
-                Q(tags__icontains=search) |
+                Q(tags__icontains=search),
                 topico_delete=False
             ).distinct()
             serializer_topicos = TopicoSerializer(topicos, many=True)
