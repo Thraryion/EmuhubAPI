@@ -87,18 +87,23 @@ class EmuladorDelete(APIView):
         responses={
             204: openapi.Response(description="Emulador deletado com sucesso."),
             400: openapi.Response(description="Dados inválidos."),
-            404: openapi.Response(description="Emulador não encontrado.")
+            404: openapi.Response(description="Emulador não encontrado."),
+            401: openapi.Response(description="Não autenticado."),
         }
     )
     def delete(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
+        authorization = request.headers.get('Authorization', '')
+        if authorization is None:
+            return Response({'error': 'Authentication token is required'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        token = authorization.split(' ')[-1]
         payload = Token.decode_token(token)
         if payload is None:
             return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
         if payload.get('admin') is False:
             return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
 
-        emulador_id = request.data.get('id')
+        emulador_id = request.query_params.get('id')
         try:
             emulador = Emulador.objects.get(id=emulador_id)
             emulador.delete()

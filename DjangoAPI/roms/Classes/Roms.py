@@ -6,6 +6,7 @@ from ..serializer import ROMSerializer
 import os
 import base64
 import asyncio
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.response import Response
 from django.http import HttpResponse
@@ -31,6 +32,26 @@ class Roms():
             jogo = self.create_data(rom.id, rom.title, rom.description, rom.emulador_id, rom.categoria_id, categoria.nome ,self.encode_image_to_base64(rom.image), rom.file, emulador.empresa, emulador.console, emulador.nome)
             data.append(jogo)
         return data
+
+    def search(self, search):
+        try:
+            roms = ROM.objects.filter(
+                Q(title__icontains=search) |
+                Q(description__icontains=search) |
+                Q(categoria__nome__icontains=search) |
+                Q(emulador__nome__icontains=search)
+            ).distinct()
+
+            data = []
+            for rom in roms:
+                categoria = Categoria_Jogo.objects.get(id=rom.categoria_id)
+                emulador = Emulador.objects.get(id=rom.emulador_id)
+                jogo = self.create_data(rom.id, rom.title, rom.description, rom.emulador_id, rom.categoria_id, categoria.nome, self.encode_image_to_base64(rom.image), rom.file, emulador.empresa, emulador.console, emulador.nome)
+                data.append(jogo)
+
+            return data
+        except Exception as e:
+            return Response({'error': 'Erro interno do servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def rom_detail(self, id_rom):
         try:

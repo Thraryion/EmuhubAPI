@@ -37,7 +37,6 @@ class CreateComentario(APIView):
         user_id = payload.get('user_id')
         user = get_object_or_404(User, id=user_id)
 
-        # Validação do campo id_topico
         topico_id = request.data.get('id_topico')
         if not topico_id:
             return Response({'error': 'O campo id_topico é obrigatório.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -54,14 +53,16 @@ class CreateComentario(APIView):
 
         data['id_user'] = user_id
         serializer = ComentarioSerializer(data=data)
+        
+        print(id_user_comentario)
 
         if serializer.is_valid():
             serializer.save()
 
             try:
-                Pusher.notificarComentario(user.username, topico_id, id_user_comentario)
+                Pusher.notificarComentario(user.username, id_user_comentario ,topico_id)
             except Exception as e:
-                logging.error(f"Erro ao enviar notificação: {e}")
+                logging.error(f"Erro ao enviar notificação de comentario: {e}")
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -251,4 +252,6 @@ class ComentarioIsHelpful(APIView):
             return Response(serializer.data)
         except Comentario.DoesNotExist:
             return Response({'error': 'Comentário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+
             

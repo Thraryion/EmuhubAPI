@@ -140,7 +140,7 @@ class TopicoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Topico
-        fields = ['id', 'titulo', 'img_topico','img_topico64', 'descricao', 'id_categoria', 'categoria', 'id_user', 'user', 'comentarios', 'likes', 'tags', 'created_at', 'updated_at', 'has_liked']
+        fields = ['id', 'titulo', 'img_topico','img_topico64', 'descricao', 'id_categoria', 'tags', 'categoria', 'id_user', 'user', 'comentarios', 'likes', 'created_at', 'updated_at', 'has_liked']
         extra_kwargs = {
             'id_categoria': {'write_only': True},
             'categoria': {'read_only': True},
@@ -199,12 +199,13 @@ class TopicoDetailSerializer(serializers.ModelSerializer):
     categoria = serializers.SerializerMethodField()
     img_topico64 = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()
-    qtd_comentarios = serializers.SerializerMethodField()
+    comentarios = serializers.SerializerMethodField()
     likes = serializers.SerializerMethodField()
+    obj_comentarios = serializers.SerializerMethodField()
 
     class Meta:
         model = Topico
-        fields = ['id', 'titulo', 'img_topico', 'img_topico64', 'descricao', 'id_categoria', 'categoria', 'id_user', 'user', 'qtd_comentarios', 'likes', 'tags', 'created_at', 'updated_at', 'has_liked']
+        fields = ['id', 'titulo', 'img_topico', 'img_topico64', 'descricao', 'tags', 'id_categoria', 'categoria', 'id_user', 'user', 'comentarios', 'obj_comentarios', 'likes', 'created_at', 'updated_at', 'has_liked']
         extra_kwargs = {
             'id_categoria': {'write_only': True},
             'categoria': {'read_only': True},
@@ -220,14 +221,18 @@ class TopicoDetailSerializer(serializers.ModelSerializer):
     def get_user(self, obj):
         user = User.objects.get(id=obj.id_user.id)
         return UserSerializer(user).data
+
+    def get_obj_comentarios(self, obj):
+        comentarios = Comentario.objects.filter(id_topico=obj.id, comentario_delete=False)
+        return ComentarioSerializer(comentarios, many=True).data
     
     def get_likes(self, obj):
         likes = LikeTopico.objects.filter(id_topico=obj.id).count()
         return likes
     
-    def get_qtd_comentarios(self, obj):
-        comentarios = Comentario.objects.filter(id_topico=obj.id, comentario_delete=False)
-        return ComentarioSerializer(comentarios, many=True).data
+    def get_comentarios(self, obj):
+        comentarios = Comentario.objects.filter(id_topico=obj.id, comentario_delete=False).count()
+        return comentarios
 
     def get_img_topico64(self, obj):
         if obj.img_topico:
@@ -280,6 +285,23 @@ class ComentarioSerializer(serializers.ModelSerializer):
                 
 
 class DenunciaSerializer(serializers.ModelSerializer):
+    content_type_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Denuncia
-        fields = ['id', 'reported_by', 'content_type', 'content_id', 'reason', 'status', 'reviewed_by', 'resolution', 'created_at', 'updated_at']
+        fields = [
+            'id',
+            'reported_by',
+            'content_type',
+            'content_type_name',
+            'content_id',
+            'reason',
+            'status',
+            'reviewed_by',
+            'resolution',
+            'created_at',
+            'updated_at',
+        ]
+
+    def get_content_type_name(self, obj):
+        return obj.content_type.model

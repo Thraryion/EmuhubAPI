@@ -1,4 +1,5 @@
 from rest_framework.views import APIView
+from django.contrib.contenttypes.models import ContentType
 from rest_framework.response import Response
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
@@ -25,45 +26,55 @@ class CreateDenuncia(APIView):
     def post(self, request):
         token = request.headers.get('Authorization', '').split(' ')[1]
         payload = Token.decode_token(token)
+
         if payload is None:
-            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
-        if payload.get('admin') is False:
-            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if not payload.get('admin', False):  # Corrigido para evitar KeyError
+            return Response({'error': 'Usuário não autorizado'}, status=status.HTTP_403_FORBIDDEN)
+
         data = request.data.copy()
-        
+
         try:
             content_type_str = data.get('content_type')
             content_id = data.get('content_id')
-            
+
             if not content_type_str or not content_id:
-                return Response({'error': 'Campos content_type e content_id são obrigatórios.'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {'error': 'Os campos content_type e content_id são obrigatórios.'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
-            try:
-                model_class = {
-                    'post': Post,
-                    'comentario': Comentario
-                }.get(content_type_str.lower())
-                
-                if not model_class:
-                    return Response({'error': 'Tipo de conteúdo inválido.'}, status=status.HTTP_400_BAD_REQUEST)
-                
-                content_type = ContentType.objects.get_for_model(model_class)
-                data['content_type'] = content_type.id
+            model_map = {
+                'topico': Topico,
+                'comentario': Comentario
+            }
 
-            except ContentType.DoesNotExist:
-                return Response({'error': 'Tipo de conteúdo não encontrado.'}, status=status.HTTP_400_BAD_REQUEST)
-            
+            model_class = model_map.get(content_type_str.lower())
+            if not model_class:
+                return Response(
+                    {'error': f"Tipo de conteúdo '{content_type_str}' inválido."}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            content_type = ContentType.objects.get_for_model(model_class)
+            data['content_type'] = content_type.id 
+
             if not model_class.objects.filter(id=content_id).exists():
-                return Response({'error': 'Objeto associado ao content_id não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
-            
+                return Response(
+                    {'error': f"Objeto com id={content_id} não encontrado no tipo '{content_type_str}'."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
             serializer = DenunciaSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         except Exception as e:
-            logger.error(f"Erro ao criar denúncia: {str(e)}")
+            logger.error(f"Erro ao criar denúncia: {str(e)}", exc_info=True)
             return Response({'error': 'Erro interno do servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class List_Denuncia(APIView):
@@ -98,7 +109,7 @@ class banned_User(APIView):
             401: "Não autorizado",
             404: "Usuário não encontrado"
         })
-    def post(self, request):
+    def get(self, request):
         token = request.headers.get('Authorization', '').split(' ')[1]
         payload = Token.decode_token(token)
         if payload is None:
@@ -110,7 +121,7 @@ class banned_User(APIView):
             user = User.objects.get(id=user_id)
             user.is_banned = True
             user.save()
-            return Response(status=status.HTTP_200_OK)
+            return Response({'status': 'User banned successfully'})
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -146,6 +157,6 @@ class update_status(APIView):
             denuncia.status = status
             denuncia.resolution = resolution
             denuncia.save()
-            return Response(status=status.HTTP_200_OK)
+            return Response({'status': 'Denuncia updated successfully'})
         except Denuncia.DoesNotExist:
             return Response({'error': 'Denuncia not found'}, status=status.HTTP_404_NOT_FOUND)

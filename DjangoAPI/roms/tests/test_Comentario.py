@@ -35,6 +35,7 @@ class ComentarioTests(APITestCase):
             "id_parent": ''
         }
         response = self.client.post(url, data, HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        print(response)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Comentario.objects.count(), 2)
 
