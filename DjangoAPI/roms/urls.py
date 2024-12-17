@@ -6,7 +6,7 @@ from .views import (
                     Emuladores, Categorias, EmuladorCreate, EmuladorUpdate, EmuladorDelete, EmuladorDownload,
                     CreateTopico, UpdateTopico, ListTopicos, DeleteTopico, TopicoDetail, LikeTopicoView, UnlikeTopicoView, list_categorias,
                     CreateComentario, UpdateComentario, ListComentarios, DeleteComentario, ComentarioIsHelpful, LikeComentarioView, UnlikeComentarioView,
-                    MensagemCreate, ConversaCreate, Detail_Conversa, List_Conversas,
+                    # MensagemCreate, ConversaCreate, Detail_Conversa, List_Conversas,
                     SearchRom, SearchTopico,
                     CreateDenuncia, List_Denuncia, banned_User, update_status
                 )
@@ -56,10 +56,10 @@ urlpatterns = [
     path("comentarios/like/", LikeComentarioView.as_view(), name="comentario-like"),
     path("comentarios/unlike/", UnlikeComentarioView.as_view(), name="comentario-unlike"),
     path("comentarios/is-helpful/", ComentarioIsHelpful.as_view(), name="comentario-is-helpful"),
-    path("conversas/create/", ConversaCreate.as_view(), name="conversa-create"),
-    path("conversas/detail/", Detail_Conversa.as_view(), name="conversa-detail"),
-    path("conversas/list/", List_Conversas.as_view(), name="conversa-list"),
-    path("mensagens/create/", MensagemCreate.as_view(), name="mensagem-create"),
+    # path("conversas/create/", ConversaCreate.as_view(), name="conversa-create"),
+    # path("conversas/detail/", Detail_Conversa.as_view(), name="conversa-detail"),
+    # path("conversas/list/", List_Conversas.as_view(), name="conversa-list"),
+    # path("mensagens/create/", MensagemCreate.as_view(), name="mensagem-create"),
     path("denuncia/create/", CreateDenuncia.as_view(), name="denuncia-create"),
     path("denuncia/list/", List_Denuncia.as_view(), name="denuncia-list"),
     path("denuncia/banned/", banned_User.as_view(), name="banned-user"),

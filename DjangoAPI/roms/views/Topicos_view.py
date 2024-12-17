@@ -63,9 +63,17 @@ class ListTopicos(APIView):
         })
     def get(self, request):
         topicos_obj = Topico.objects.filter(topico_delete=False).order_by('-created_at')
-        user_id = request.GET.get('id_user')
-        
-        serializer = TopicoSerializer(topicos_obj, many=True, context={'user_id': user_id})
+        token = request.headers.get('Authorization', '').split(' ')[1] if 'Authorization' in request.headers else None
+
+        logger.info(f"Token recebido: {token}")
+        user_id = None
+        if token:
+            payload = Token.decode_token(token)
+            logger.info(f"Payload decodificado: {payload}")
+            if payload and isinstance(payload, dict):
+                user_id = payload.get('user_id')
+
+        serializer = TopicoSerializer(topicos_obj, context={'user_id': user_id}, many=True)
         
         return Response(serializer.data)
 
