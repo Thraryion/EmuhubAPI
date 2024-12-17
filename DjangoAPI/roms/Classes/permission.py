@@ -52,8 +52,5 @@ class IsUserPermission(BasePermission):
         if not payload:
             raise UnauthorizedException('Token inválido.')
 
-        if not payload.get('admin'):
-            raise ForbiddenException('Permissão negada para este recurso.')
-
         request.payload = payload
         return True
