@@ -11,12 +11,7 @@ class Wishlist():
     def __init__(self):
         pass
 
-    def add_to_wishlist(self, rom_id, token):
-        payload = Token.decode_token(token)
-        if payload is None:
-            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        user_id = payload['user_id']
+    def add_to_wishlist(self, rom_id, user_id):
 
         user = User.objects.get(id=user_id)
         rom = ROM.objects.get(id=rom_id)
@@ -25,12 +20,7 @@ class Wishlist():
         serializer = UserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def remove_wishlist(self, rom_id, token):
-        payload = Token.decode_token(token)
-        if payload is None:
-            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        user_id = payload['user_id']
+    def remove_wishlist(self, rom_id, user_id):
 
         user = User.objects.get(id=user_id)
         rom = ROM.objects.get(id=rom_id)

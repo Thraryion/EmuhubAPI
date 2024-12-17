@@ -95,6 +95,7 @@ class TopicoAPITests(APITestCase):
         }
 
         response = self.client.post(url, data, HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(LikeTopico.objects.filter(id_topico=self.topico.id, id_user=self.user).exists())
 

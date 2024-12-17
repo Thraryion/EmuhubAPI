@@ -8,6 +8,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import logging
 
+from ..Classes.permission import IsAdminPermission, IsUserPermission
 from ..Classes.notificacoes import PusherClient
 from ..Classes.token import Token
 from ..models import Topico, LikeTopico, User, CategoriaForum
@@ -19,6 +20,9 @@ Token = Token()
 Pusher = PusherClient()
 
 class CreateTopico(APIView):    
+
+    permission_classes = [IsUserPermission]
+
     @swagger_auto_schema(
         request_body=TopicoSerializer,
         responses={
@@ -31,11 +35,8 @@ class CreateTopico(APIView):
             )
         })
     def post(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if not payload:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-        user_id = payload['user_id']
+        payload = request.payload
+        user_id = payload.get('user_id')
 
         data = request.data.copy()
         data['id_user'] = user_id
@@ -79,6 +80,9 @@ class ListTopicos(APIView):
 
 
 class UpdateTopico(APIView):
+
+    permission_classes = [IsUserPermission]
+
     @swagger_auto_schema(
         request_body=TopicoSerializer,
         responses={
@@ -94,12 +98,6 @@ class UpdateTopico(APIView):
             )
         })
     def put(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if not payload:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-        if payload.get('admin') is False:
-            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
         topico_id = request.data.get('topico_id')
         try:
             topico = Topico.objects.get(id=topico_id)
@@ -113,6 +111,9 @@ class UpdateTopico(APIView):
 
 
 class DeleteTopico(APIView):
+
+    permission_classes = [IsUserPermission]
+
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter('topico_id', openapi.IN_QUERY, description="ID do tópico", type=openapi.TYPE_INTEGER)
@@ -129,11 +130,6 @@ class DeleteTopico(APIView):
             )
         })
     def delete(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if not payload:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-        user_id = payload['user_id']
         topico_id = request.data.get('topico_id')
         try:
             topico = Topico.objects.get(id=topico_id)
@@ -179,6 +175,9 @@ class TopicoDetail(APIView):
 
 
 class LikeTopicoView(APIView):
+
+    permission_classes = [IsUserPermission]
+
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -196,11 +195,8 @@ class LikeTopicoView(APIView):
             )
         })
     def post(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if not payload:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-        user_id = payload['user_id']
+        payload = request.payload
+        user_id = payload.get('user_id')
         user = User.objects.get(id=user_id)
         try:
             data = request.data.copy()
@@ -223,6 +219,9 @@ class LikeTopicoView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class UnlikeTopicoView(APIView):
+
+    permission_classes = [IsUserPermission]
+
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter('topico_id', openapi.IN_QUERY, description="ID do tópico", type=openapi.TYPE_INTEGER)
@@ -240,10 +239,7 @@ class UnlikeTopicoView(APIView):
         })
     def delete(self, request):
         topico_id = request.GET.get('topico_id')
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if not payload:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
+        payload = request.payload
         user_id = payload['user_id']
         try:
             like = LikeTopico.objects.get(id_user=user_id, id_topico=topico_id)

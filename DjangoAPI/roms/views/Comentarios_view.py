@@ -11,13 +11,19 @@ import logging
 from ..models import Comentario, LikeComentario, User, Topico
 from ..serializer import ComentarioSerializer, LikeComentarioSerializer
 from ..Classes.token import Token
+from ..Classes.Auth import Auth
+from ..Classes.permission import IsAdminPermission, IsUserPermission
 from ..Classes.notificacoes import PusherClient
 
 logger = logging.getLogger(__name__)
 Token = Token()
 Pusher = PusherClient()
+Auth = Auth()
 
 class CreateComentario(APIView):
+
+    permission_classes = [IsUserPermission]
+
     @swagger_auto_schema(
         request_body=ComentarioSerializer,
         responses={
@@ -30,16 +36,12 @@ class CreateComentario(APIView):
             )
         })
     def post(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if not payload:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-        user_id = payload.get('user_id')
-        user = get_object_or_404(User, id=user_id)
-
         topico_id = request.data.get('id_topico')
         if not topico_id:
             return Response({'error': 'O campo id_topico é obrigatório.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        payload = request.payload
+        user_id = payload.get('user_id')
 
         data = request.data.copy()
         id_user_comentario = None
@@ -87,6 +89,9 @@ class ListComentarios(APIView):
         return Response(serializer.data)
 
 class UpdateComentario(APIView):
+
+    permission_classes = [IsUserPermission]
+
     @swagger_auto_schema(
         request_body=ComentarioSerializer,
         responses={
@@ -102,11 +107,9 @@ class UpdateComentario(APIView):
             )
         })
     def put(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if not payload:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
+        payload = request.payload
         comentario_id = request.data.get('id')
+
         user_id = payload['user_id']
         data = request.data.copy()
         data['id_user'] = user_id
@@ -121,6 +124,9 @@ class UpdateComentario(APIView):
             return Response({'error': 'Comentário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
 class DeleteComentario(APIView):
+
+    permission_classes = [IsUserPermission]
+
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -149,6 +155,9 @@ class DeleteComentario(APIView):
             return Response({'error': 'Comentário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
 class LikeComentarioView(APIView):
+
+    permission_classes = [IsUserPermission]
+
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -171,11 +180,8 @@ class LikeComentarioView(APIView):
     def post(self, request):
         comentario_id = request.data.get('id_comentario')
         comentario = Comentario.objects.get(id=comentario_id)
+        payload = request.payload
 
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if not payload:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
         user_id = payload['user_id']
         user = User.objects.get(id=user_id)
 
@@ -192,6 +198,9 @@ class LikeComentarioView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class UnlikeComentarioView(APIView):
+
+    permission_classes = [IsUserPermission]
+
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -212,10 +221,7 @@ class UnlikeComentarioView(APIView):
             )
         })
     def delete(self, request):
-        token = request.headers.get('Authorization').split(' ')[1]
-        payload = Token.decode_token(token)
-        if not payload:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
+        payload = request.payload
         user_id = payload['user_id']
         comentario_id = request.data.get('id')
         try:

@@ -8,6 +8,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from ..models import User
 from ..serializer import UserSerializer
 from ..Classes.token import Token
+from ..Classes.permission import IsAdminPermission, IsUserPermission
 
 import logging
 
@@ -16,24 +17,23 @@ logger = logging.getLogger(__name__)
 Token = Token()
 
 class UserListView(APIView):
+
+    permission_classes = [IsAdminPermission]
+
     @swagger_auto_schema(
         responses={
             200: openapi.Response("Lista de usuários", UserSerializer(many=True)),  
             403: "Acesso negado"
         })
     def get(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if payload is None:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-        
-        if payload.get('admin', False):
-            users = User.objects.all()
-            serializer = UserSerializer(users, many=True)
-            return Response(serializer.data)
-        return Response({'error': 'Acesso negado'}, status=status.HTTP_403_FORBIDDEN)
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
 
 class UserDetailView(APIView):
+
+    permission_classes = [IsUserPermission]
+
     @swagger_auto_schema(
         responses={
             200: openapi.Response("Detalhes do usuário", UserSerializer),  
@@ -41,11 +41,7 @@ class UserDetailView(APIView):
             401: "Token inválido"
         })
     def get(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if payload is None:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-
+        payload = request.payload
         user_id = payload.get('user_id')
         if user_id:
             try:
@@ -72,6 +68,9 @@ class UserRegister(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserUpdate(APIView):
+
+    permission_classes = [IsUserPermission]
+
     @swagger_auto_schema(
         request_body=UserSerializer,
         responses={
@@ -81,11 +80,7 @@ class UserUpdate(APIView):
             401: "Token inválido"
         })
     def put(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if payload is None:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-
+        payload = request.payload
         user_id = payload.get('user_id')
         if not user_id:
             return Response({'error': 'ID do usuário não fornecido'}, status=status.HTTP_400_BAD_REQUEST)
@@ -103,6 +98,9 @@ class UserUpdate(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
 class UserDelete(APIView):
+    
+    permission_classes = [IsUserPermission]
+
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter('user_id', openapi.IN_QUERY, description="ID do usuário", type=openapi.TYPE_INTEGER)
@@ -114,18 +112,14 @@ class UserDelete(APIView):
             401: "Token inválido"
         })
     def delete(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if payload is None:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-        
         user_id = request.data.get('user_id')
         if not user_id:
             return Response({'error': 'ID do usuário não fornecido'}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
             user = User.objects.get(id=user_id)
-            user.delete()
+            user.is_active = False
+            user.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except User.DoesNotExist:
             return Response({'error': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)

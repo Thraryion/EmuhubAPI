@@ -119,6 +119,14 @@ class Auth:
         payload = Token.decode_token(token)
         if payload is None:
             return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+        return payload
+
+    def verify_token_admin(self, token):
+        if token is None:
+            return Response({'error': 'Token not provided'}, status=status.HTTP_401_UNAUTHORIZED)
+        payload = Token.decode_token(token)
+        if payload is None:
+            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
         if payload.get('admin') == False:
             return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
         return payload
