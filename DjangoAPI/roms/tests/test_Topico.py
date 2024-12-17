@@ -42,21 +42,13 @@ class TopicoAPITests(APITestCase):
         self.assertEqual(response.data["descricao"], data["descricao"])
 
     def test_list_topicos(self):
-        for i in range(15):
-            Topico.objects.create(
-                titulo=f"Tópico {i}",
-                descricao=f"Descrição {i}",
-                id_categoria=self.categoria,
-                id_user=self.user
-            )
         url_like = reverse('topico-like')
         data = {
             "id_topico": self.topico.id,
         }
         response_like = self.client.post(url_like, data, HTTP_AUTHORIZATION=f'Bearer {self.token}')
 
-        url = reverse('topico-list') + f"?id_user={self.user.id}"
-        response = self.client.get(self.list_url)
+        response = self.client.get(self.list_url, HTTP_AUTHORIZATION=f'Bearer {self.token}')
         print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
