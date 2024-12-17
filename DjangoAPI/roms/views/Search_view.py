@@ -11,11 +11,9 @@ from django.db.models import Q
 
 from ..models import Topico, ROM, Categoria_Jogo, CategoriaForum
 from ..serializer import TopicoSerializer, ROMSerializer
-from ..Classes.token import Token
 from ..Classes.Roms import Roms
 
 logger = logging.getLogger(__name__)
-Token = Token()
 
 class SearchTopico(APIView):
     @swagger_auto_schema(

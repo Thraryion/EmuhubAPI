@@ -8,33 +8,35 @@ import logging
 from ..Classes.wishlist import Wishlist
 from ..Classes.token import Token
 from ..Classes.Roms import Roms
+from ..Classes.permission import IsUserPermission
 from ..models import User
 from ..serializer import ROMSerializer, UserSerializer
 
 logger = logging.getLogger(__name__)
 
 Roms = Roms()
-Token = Token()
 Wishlist = Wishlist()
 
 class UserViewWishlist(APIView):
+
+    permission_classes = [IsUserPermission]
+
     @swagger_auto_schema(
         responses={
             200: openapi.Response("Lista de desejos do usuário", ROMSerializer(many=True)),  
             401: "Token inválido"
         })
     def get(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if payload is None:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-
+        payload = request.payload
         user_id = payload['user_id']
         wishlist = Roms.get_wishlist(user_id)
         return Response(wishlist)
         
 
 class UserAddWishlist(APIView):
+
+    permission_classes = [IsUserPermission]
+
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -49,18 +51,18 @@ class UserAddWishlist(APIView):
             400: "Dados inválidos"
         })
     def post(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if payload is None:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-
+        payload = request.payload
+        user_id = payload['user_id']
         rom_id = request.data.get('rom_id')
         if rom_id:
-            response = Wishlist.add_to_wishlist(rom_id, token)
+            response = Wishlist.add_to_wishlist(rom_id, user_id)
             return response
         return Response({'error': 'ID do ROM não fornecido'}, status=status.HTTP_400_BAD_REQUEST)
 
 class UserRemoveWishlist(APIView):
+
+    permission_classes = [IsUserPermission]
+
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -75,13 +77,10 @@ class UserRemoveWishlist(APIView):
             400: "Dados inválidos"
         })
     def delete(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if payload is None:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-
+        payload = request.payload
+        user_id = payload['user_id']
         rom_id = request.data.get('rom_id')
         if rom_id:
-            response = Wishlist.remove_wishlist(rom_id, token)
+            response = Wishlist.remove_wishlist(rom_id, user_id)
             return response
         return Response({'error': 'ID do ROM não fornecido'}, status=status.HTTP_400_BAD_REQUEST)

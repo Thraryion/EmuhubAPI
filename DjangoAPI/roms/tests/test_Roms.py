@@ -4,6 +4,11 @@ from rest_framework.test import APITestCase
 from ..models import ROM, Categoria_Jogo, Emulador, User
 from django.conf import settings
 import jwt
+from datetime import datetime, timedelta
+
+from ..Classes.token import Token
+
+Token = Token()
 
 class RomsTests(APITestCase):
     def setUp(self):
@@ -27,15 +32,8 @@ class RomsTests(APITestCase):
             categoria=self.categoria,
             emulador=self.emulador,
         )
+        self.token = Token.create_token(self.user.id, self.user.admin, datetime.utcnow() + timedelta(minutes=60))
 
-    def _generate_token(self):
-        token = jwt.encode(
-            {'user_id': self.user.id,
-            'admin': self.user.admin},
-            settings.SECRET_KEY,
-            algorithm='HS256'
-        )
-        return token
 
     def test_list_roms(self):
         url = reverse('rom-list')
@@ -43,7 +41,6 @@ class RomsTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_create_rom(self):
-        token = self._generate_token()
         url = reverse('rom-create')
         data = {
             'title': 'Test ROM 2',
@@ -51,7 +48,7 @@ class RomsTests(APITestCase):
             'categoria': self.categoria.id,
             'emulador': self.emulador.id,
         }
-        response = self.client.post(url, data, HTTP_AUTHORIZATION=f'Token {token}')
+        response = self.client.post(url, data, HTTP_AUTHORIZATION=f'Bearer {self.token}')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(ROM.objects.count(), 2)
 
@@ -61,7 +58,6 @@ class RomsTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update_rom(self):
-        token = self._generate_token()
         url = reverse('rom-update')
         data = {
             'rom_id': self.rom.id,
@@ -70,14 +66,14 @@ class RomsTests(APITestCase):
             'categoria': self.categoria.id,
             'emulador': self.emulador.id,
         }
-        response = self.client.put(url, data, HTTP_AUTHORIZATION=f'Token {token}')
+        response = self.client.put(url, data, HTTP_AUTHORIZATION=f'Bearer {self.token}')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.rom.refresh_from_db()
         self.assertEqual(self.rom.title, 'Test ROM Updated')
 
     def test_delete_rom(self):
-        token = self._generate_token()
         url = reverse('rom-delete') + f'?rom_id={self.rom.id}'
-        response = self.client.delete(url, HTTP_AUTHORIZATION=f'Token {token}')
+        self.client
+        response = self.client.delete(url, HTTP_AUTHORIZATION=f'Bearer {self.token}')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(ROM.objects.count(), 0)

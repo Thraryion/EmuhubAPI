@@ -7,6 +7,7 @@ from django.core.files.storage import default_storage
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
+from ..Classes.permission import IsUserPermission, IsAdminPermission
 from ..Classes.wishlist import Wishlist
 from ..Classes.Roms import Roms
 from ..Classes.Auth import Auth
@@ -56,6 +57,9 @@ class ROMDetailView(APIView):
             return Response({'error': 'Erro interno do servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class ROMCreate(APIView):
+
+    permission_classes = [IsAdminPermission]
+
     @swagger_auto_schema(
         request_body=ROMSerializer,
         responses={
@@ -64,12 +68,6 @@ class ROMCreate(APIView):
             401: "Não autorizado"
         })
     def post(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if payload is None:
-            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
-        if payload.get('admin') is False:
-            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
         try:
             serializer = ROMSerializer(data=request.data)
             if serializer.is_valid():
@@ -81,6 +79,9 @@ class ROMCreate(APIView):
             return Response({'error': 'Erro interno do servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class ROMUpdate(APIView):
+
+    permission_classes = [IsAdminPermission]
+
     @swagger_auto_schema(
         request_body=ROMSerializer,
         responses={
@@ -89,12 +90,6 @@ class ROMUpdate(APIView):
             401: "Não autorizado"
         })
     def put(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if payload is None:
-            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
-        if payload.get('admin') is False:
-            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
         rom_id = request.data.get('rom_id')
         try:
             rom = ROM.objects.get(id=rom_id)
@@ -108,6 +103,9 @@ class ROMUpdate(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ROMDelete(APIView):
+
+    permission_classes = [IsAdminPermission]
+
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter('rom_id', openapi.IN_QUERY, description="ID do ROM", type=openapi.TYPE_INTEGER)
@@ -118,12 +116,6 @@ class ROMDelete(APIView):
             404: "ROM não encontrado"
         })
     def delete(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if payload is None:
-            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
-        if payload.get('admin') is False:
-            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
         rom_id = request.GET.get('rom_id') 
         try:
             ROM.objects.get(id=rom_id).delete()

@@ -7,6 +7,7 @@ from drf_yasg import openapi
 from django.shortcuts import get_object_or_404
 import logging
 
+from ..Classes.permission import IsAdminPermission, IsUserPermission
 from ..Classes.wishlist import Wishlist
 from ..Classes.token import Token
 from ..models import Denuncia, User, Topico, Comentario
@@ -16,6 +17,9 @@ Token = Token()
 logger = logging.getLogger(__name__)
 
 class CreateDenuncia(APIView):
+
+    permission_classes = [IsUserPermission]
+
     @swagger_auto_schema(
         request_body=DenunciaSerializer,
         responses={
@@ -24,15 +28,6 @@ class CreateDenuncia(APIView):
             401: "Não autorizado"
         })
     def post(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-
-        if payload is None:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        if not payload.get('admin', False):  # Corrigido para evitar KeyError
-            return Response({'error': 'Usuário não autorizado'}, status=status.HTTP_403_FORBIDDEN)
-
         data = request.data.copy()
 
         try:
@@ -78,18 +73,15 @@ class CreateDenuncia(APIView):
             return Response({'error': 'Erro interno do servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class List_Denuncia(APIView):
+
+    permission_classes = [IsAdminPermission]
+
     @swagger_auto_schema(
         responses={
             200: openapi.Response(description="Lista de denúncias", schema=DenunciaSerializer(many=True)),
             401: "Não autorizado"
         })
     def get(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if payload is None:
-            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
-        if payload.get('admin') is False:
-            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
         try:
             denuncias = Denuncia.objects.all()
             serializer = DenunciaSerializer(denuncias, many=True)
@@ -99,6 +91,9 @@ class List_Denuncia(APIView):
             return Response({'error': 'Erro interno do servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class banned_User(APIView):
+
+    permission_classes = [IsAdminPermission]
+
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter('user_id', openapi.IN_QUERY, description="ID do usuário", type=openapi.TYPE_INTEGER)
@@ -110,12 +105,6 @@ class banned_User(APIView):
             404: "Usuário não encontrado"
         })
     def get(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if payload is None:
-            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
-        if payload.get('admin') is False:
-            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
         user_id = request.GET.get('user_id')
         try:
             user = User.objects.get(id=user_id)
@@ -126,6 +115,9 @@ class banned_User(APIView):
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
 class update_status(APIView):
+
+    permission_classes = [IsAdminPermission]
+
     @swagger_auto_schema(
         operation_description="Atualiza o status de uma denúncia",
         request_body=openapi.Schema(
@@ -145,12 +137,6 @@ class update_status(APIView):
         }
     )
     def post(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if payload is None:
-            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
-        if payload.get('admin') is False:
-            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
         denuncia_id = request.data.get('denuncia_id')
         status = request.data.get('status')
         resolution = request.data.get('resolution')
