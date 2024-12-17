@@ -6,7 +6,7 @@ services:
       - img_roms:/DjangoAPI/media/img/
       - arq_roms:/DjangoAPI/media/roms/
       - img_perf:/DjangoAPI/media/img-perfil/
-      - img_top:/DjangoAPI/media/img-topico/
+      - img_topico:/DjangoAPI/media/img-topico/
     ports:
       - "8080:8000"
     depends_on:
@@ -32,3 +32,4 @@ volumes:
   img_roms:
   arq_roms:
   img_perf:
+  img_topico:
