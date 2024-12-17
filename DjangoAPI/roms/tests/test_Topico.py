@@ -49,8 +49,15 @@ class TopicoAPITests(APITestCase):
                 id_categoria=self.categoria,
                 id_user=self.user
             )
+        url_like = reverse('topico-like')
+        data = {
+            "id_topico": self.topico.id,
+        }
+        response_like = self.client.post(url_like, data, HTTP_AUTHORIZATION=f'Bearer {self.token}')
+
         url = reverse('topico-list') + f"?id_user={self.user.id}"
         response = self.client.get(self.list_url)
+        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update_topico(self):
@@ -153,7 +160,6 @@ class TopicoAPITests(APITestCase):
         
         url = reverse('topico-detail') + f"?topico_id={self.topico.id}"
         response = self.client.get(url, HTTP_AUTHORIZATION=f'Bearer {self.token}')
-        print(response.data)
         self.assertEqual(response.status_code, 200)
         
         comentarios = response.data['obj_comentarios']

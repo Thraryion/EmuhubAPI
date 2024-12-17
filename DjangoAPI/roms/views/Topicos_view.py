@@ -65,7 +65,7 @@ class ListTopicos(APIView):
         topicos_obj = Topico.objects.filter(topico_delete=False).order_by('-created_at')
         user_id = request.GET.get('id_user')
         
-        serializer = TopicoSerializer(topicos_obj, many=True, context={'id_user': user_id})
+        serializer = TopicoSerializer(topicos_obj, many=True, context={'user_id': user_id})
         
         return Response(serializer.data)
 
