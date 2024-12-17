@@ -7,11 +7,13 @@ import logging
 
 from ..Classes.wishlist import Wishlist
 from ..Classes.token import Token
+from ..Classes.Roms import Roms
 from ..models import User
 from ..serializer import ROMSerializer, UserSerializer
 
 logger = logging.getLogger(__name__)
 
+Roms = Roms()
 Token = Token()
 Wishlist = Wishlist()
 
@@ -28,13 +30,9 @@ class UserViewWishlist(APIView):
             return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
 
         user_id = payload['user_id']
-        try:
-            user = User.objects.get(id=user_id)
-            wishlist = user.wishlist.all()
-            serializer = ROMSerializer(wishlist, many=True)
-            return Response(serializer.data)
-        except User.DoesNotExist:
-            return Response({'error': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        wishlist = Roms.get_wishlist(user_id)
+        return Response(wishlist)
+        
 
 class UserAddWishlist(APIView):
     @swagger_auto_schema(

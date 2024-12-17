@@ -3,6 +3,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from ..models import User, ROM
 from ..serializer import UserSerializer
+from ..Classes.token import Token
+
+Token = Token()
 
 class Wishlist():
     def __init__(self):
