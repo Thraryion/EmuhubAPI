@@ -1,4 +1,4 @@
-from ..models import ROM, Categoria_Jogo, Emulador
+from ..models import ROM, Categoria_Jogo, Emulador, User
 from django.core.files.storage import default_storage
 from django.http import JsonResponse, Http404, FileResponse
 from django.core.exceptions import ObjectDoesNotExist
@@ -32,6 +32,21 @@ class Roms():
             jogo = self.create_data(rom.id, rom.title, rom.description, rom.emulador_id, rom.categoria_id, categoria.nome ,self.encode_image_to_base64(rom.image), rom.file, emulador.empresa, emulador.console, emulador.nome)
             data.append(jogo)
         return data
+
+    def get_wishlist(self, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            roms = user.wishlist.all()
+            data = []
+            for rom in roms:
+                categoria = Categoria_Jogo.objects.get(id=rom.categoria_id)
+                emulador = Emulador.objects.get(id=rom.emulador_id)
+                jogo = self.create_data(rom.id, rom.title, rom.description, rom.emulador_id, rom.categoria_id, categoria.nome, self.encode_image_to_base64(rom.image), rom.file, emulador.empresa, emulador.console, emulador.nome)
+                data.append(jogo)
+            return data
+        except User.DoesNotExist:
+            return Response({'error': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
 
     def search(self, search):
         try:
@@ -105,7 +120,6 @@ class Roms():
                 'id': categoria,
                 'nome': categoria_nome,
             },
-            'categoria_name': categoria_nome,
             'file': file_name,
         }
         return rom
