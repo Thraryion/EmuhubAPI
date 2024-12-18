@@ -134,12 +134,11 @@ class ROMDownload(APIView):
             200: "Download do ROM",
             404: "ROM não encontrado"
         })
-    def get(self, request, empresa, emulador_name, game_name):
-        empresa = empresa.lower()
+    def get(self, request, emulador_name, game_name):
         emulador_name = emulador_name.lower()
 
         try:
-            emulador = Emulador.objects.get(nome__iexact=emulador_name, empresa__iexact=empresa)
+            emulador = Emulador.objects.get(nome__iexact=emulador_name)
             obj = ROM.objects.get(emulador_id=emulador.id, title=game_name)
             file_path = obj.file.path
             
