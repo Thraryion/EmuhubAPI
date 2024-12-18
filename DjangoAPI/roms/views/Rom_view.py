@@ -167,3 +167,22 @@ class MostPlayed(APIView):
         except Exception as e:
             logger.error(f"Erro ao obter ROMs mais jogados: {e}")
             return Response({'error': 'Erro interno do servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# download image png
+class DownloadImage(APIView):
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('rom_name', openapi.IN_QUERY, description="Rom name", type=openapi.TYPE_INTEGER)
+        ],
+        responses={
+            200: "Imagem do ROM",
+            404: "ROM não encontrado"
+        })
+    def get(self, request):
+        try:
+            rom_name = request.GET.get('rom_name')
+            rom = ROM.objects.get(title=rom_name)
+            image_path = rom.image.path
+            if image_path:
+                response = Roms.download_image(image_path)
+                return response
