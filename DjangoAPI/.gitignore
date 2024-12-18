@@ -1,6 +1,3 @@
-# Arquivos de configuração local
-Server/settings.py
-
 # Docker e Docker Compose
 docker-compose.yml
 
