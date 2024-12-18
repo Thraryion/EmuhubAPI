@@ -186,3 +186,5 @@ class DownloadImage(APIView):
             if image_path:
                 response = Roms.download_image(image_path)
                 return response
+        except ROM.DoesNotExist:
+            return Response({'error': 'ROM não encontrado'}, status=status.HTTP_404_NOT_FOUND)
