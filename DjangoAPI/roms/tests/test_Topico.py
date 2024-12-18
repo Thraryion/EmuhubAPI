@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.urls import reverse
-from ..models import Topico, User, CategoriaForum, LikeTopico
+from ..models import Topico, User, CategoriaForum, LikeTopico, Comentario
 from ..Classes.token import Token
 from datetime import datetime, timedelta
 
@@ -42,15 +42,14 @@ class TopicoAPITests(APITestCase):
         self.assertEqual(response.data["descricao"], data["descricao"])
 
     def test_list_topicos(self):
-        for i in range(15):
-            Topico.objects.create(
-                titulo=f"Tópico {i}",
-                descricao=f"Descrição {i}",
-                id_categoria=self.categoria,
-                id_user=self.user
-            )
-        url = reverse('topico-list') + f"?id_user={self.user.id}"
-        response = self.client.get(self.list_url)
+        url_like = reverse('topico-like')
+        data = {
+            "id_topico": self.topico.id,
+        }
+        response_like = self.client.post(url_like, data, HTTP_AUTHORIZATION=f'Bearer {self.token}')
+
+        response = self.client.get(self.list_url, HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update_topico(self):
@@ -84,7 +83,7 @@ class TopicoAPITests(APITestCase):
 
         response = self.client.delete(self.delete_url, {"topico_id": topico.id}, HTTP_AUTHORIZATION=f'Bearer {self.token}')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertFalse(Topico.objects.filter(id=topico.id).exists())
+        self.assertTrue(Topico.objects.filter(id=topico.id, topico_delete=True).exists())
 
     def test_like_topico(self):
         url_unlike = reverse('topico-unlike') + f"?topico_id={self.topico.id}"
@@ -93,10 +92,10 @@ class TopicoAPITests(APITestCase):
         url = reverse('topico-like')
         data = {
             "id_topico": self.topico.id,
-            "id_user": self.user.id
         }
 
         response = self.client.post(url, data, HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(LikeTopico.objects.filter(id_topico=self.topico.id, id_user=self.user).exists())
 
@@ -111,3 +110,53 @@ class TopicoAPITests(APITestCase):
     def test_list_categoria(self):
         response = self.client.get(reverse('topico-categorias'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+    
+    def test_topico_detail(self):
+        url_like = reverse('topico-like')
+        data = {
+            "id_topico": self.topico.id,
+        }
+        response_like = self.client.post(url_like, data, HTTP_AUTHORIZATION=f'Bearer {self.token}')
+
+        url = reverse('topico-detail') + f"?topico_id={self.topico.id}"
+        response = self.client.get(url, HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["titulo"], self.topico.titulo)
+        self.assertEqual(response.data["descricao"], self.topico.descricao)
+
+    def test_coment_alin_topico_detail(self):
+        for _ in range(3):
+            Comentario.objects.create(
+                id_user=self.user,
+                id_topico=self.topico,
+                descricao="test comentario",
+                id_parent=None
+            )
+        
+        parent_comment = Comentario.objects.filter(id_parent=None).first()
+        for _ in range(3):
+            Comentario.objects.create(
+                id_user=self.user,
+                id_topico=self.topico,
+                descricao="test comentario",
+                id_parent=parent_comment
+            )
+        
+        second_level_comment = Comentario.objects.filter(id_parent=parent_comment).first()
+        for _ in range(3):
+            Comentario.objects.create(
+                id_user=self.user,
+                id_topico=self.topico,
+                descricao="test comentario",
+                id_parent=second_level_comment
+            )
+        
+        url = reverse('topico-detail') + f"?topico_id={self.topico.id}"
+        response = self.client.get(url, HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        self.assertEqual(response.status_code, 200)
+        
+        comentarios = response.data['obj_comentarios']
+        self.assertEqual(len(comentarios), 3) 
+
+        primeiro_comentario = Comentario.objects.get(id=comentarios[0]['id'])
+        self.assertEqual(primeiro_comentario.replies.count(), 3)

@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from ..Classes.wishlist import Wishlist
 from ..Classes.Roms import Roms
 from ..Classes.token import Token
+from ..Classes.permission import IsUserPermission, IsAdminPermission
 from ..models import Emulador, Categoria_Jogo
 from ..serializer import EmuladorSerializer, CategoriaJogoSerializer
 
@@ -27,6 +28,9 @@ class Emuladores(APIView):
 
 
 class EmuladorCreate(APIView):
+
+    permission_classes = [IsAdminPermission]
+
     @swagger_auto_schema(
         request_body=EmuladorSerializer,
         responses={
@@ -35,17 +39,6 @@ class EmuladorCreate(APIView):
         }
     )
     def post(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if payload is None:
-            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
-        user_id = payload.get('user_id')
-        data = request.data.copy()
-        data['user_id'] = user_id
-
-        if payload.get('admin') is False:
-            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
-
         serializer = EmuladorSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -54,6 +47,9 @@ class EmuladorCreate(APIView):
 
 
 class EmuladorUpdate(APIView):
+
+    permission_classes = [IsAdminPermission]
+
     @swagger_auto_schema(
         request_body=EmuladorSerializer,
         responses={
@@ -63,13 +59,6 @@ class EmuladorUpdate(APIView):
         }
     )
     def put(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if payload is None:
-            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
-        if payload.get('admin') is False:
-            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
-
         emulador_id = request.data.get('id')
         emulador = get_object_or_404(Emulador, id=emulador_id)
         serializer = EmuladorSerializer(emulador, data=request.data)
@@ -80,25 +69,22 @@ class EmuladorUpdate(APIView):
 
 
 class EmuladorDelete(APIView):
+
+    permission_classes = [IsAdminPermission]
+
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter('emulador_id', openapi.IN_QUERY, description="ID do emulador", type=openapi.TYPE_INTEGER)
+            openapi.Parameter('id', openapi.IN_QUERY, description="ID do emulador", type=openapi.TYPE_INTEGER)
         ],
         responses={
             204: openapi.Response(description="Emulador deletado com sucesso."),
             400: openapi.Response(description="Dados inválidos."),
-            404: openapi.Response(description="Emulador não encontrado.")
+            404: openapi.Response(description="Emulador não encontrado."),
+            401: openapi.Response(description="Não autenticado."),
         }
     )
     def delete(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        payload = Token.decode_token(token)
-        if payload is None:
-            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
-        if payload.get('admin') is False:
-            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
-
-        emulador_id = request.data.get('emulador_id')
+        emulador_id = request.query_params.get('id')
         try:
             emulador = Emulador.objects.get(id=emulador_id)
             emulador.delete()

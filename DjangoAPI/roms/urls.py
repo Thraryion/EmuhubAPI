@@ -1,14 +1,14 @@
 from django.urls import path
 from .views import (
-                    ROMDelete, ROMCreate, ROMListView, ROMUpdate, ROMDownload, ROMDetailView,
+                    ROMDelete, ROMCreate, ROMListView, ROMUpdate, ROMDownload, ROMDetailView, DownloadImage,
                     UserRegister, UserViewWishlist, UserAddWishlist, UserDelete, UserListView, UserRemoveWishlist, 
                     UserUpdate, UserDetailView, RefreshToken, Login, MostPlayed, ForgotPassword, ResetPassword,
                     Emuladores, Categorias, EmuladorCreate, EmuladorUpdate, EmuladorDelete, EmuladorDownload,
                     CreateTopico, UpdateTopico, ListTopicos, DeleteTopico, TopicoDetail, LikeTopicoView, UnlikeTopicoView, list_categorias,
                     CreateComentario, UpdateComentario, ListComentarios, DeleteComentario, ComentarioIsHelpful, LikeComentarioView, UnlikeComentarioView,
-                    MensagemCreate, ConversaCreate, Detail_Conversa, List_Conversas,
+                    # MensagemCreate, ConversaCreate, Detail_Conversa, List_Conversas,
                     SearchRom, SearchTopico,
-                    CreateDenuncia, List_Denuncia, banned_User
+                    CreateDenuncia, List_Denuncia, banned_User, update_status
                 )
 from django.conf.urls.static import static
 from django.conf import settings
@@ -16,9 +16,10 @@ from django.conf import settings
 urlpatterns = [
     path("roms/", ROMListView.as_view(), name="rom-list"),
     path("roms/detail/", ROMDetailView.as_view(), name="rom-detail"),
-    path("roms/search", SearchRom.as_view(), name="search-rom"),
+    path("roms/search/", SearchRom.as_view(), name="search-rom"),
+    path("roms/img/download/", DownloadImage.as_view(), name="download-img"),
     path('roms/mostplayed/', MostPlayed.as_view(), name='rom-mostplayed'),
-    path("roms/<str:empresa>/<str:emulador_name>/<str:game_name>/download/", ROMDownload.as_view(), name="rom-download"),
+    path("roms/<str:emulador_name>/<str:game_name>/download/", ROMDownload.as_view(), name="rom-download"),
     path("roms/update/", ROMUpdate.as_view(), name="rom-update"),
     path("roms/delete/", ROMDelete.as_view(), name="rom-delete"),
     path("roms/create/", ROMCreate.as_view(), name="rom-create"),
@@ -46,7 +47,7 @@ urlpatterns = [
     path("topicos/delete/", DeleteTopico.as_view(), name="topico-delete"),
     path("topicos/detail/", TopicoDetail.as_view(), name="topico-detail"),
     path("topicos/categorias/", list_categorias.as_view(), name="topico-categorias"),
-    path("topicos/search", SearchTopico.as_view(), name="search-topico"),
+    path("topicos/search/", SearchTopico.as_view(), name="search-topico"),
     path("comentarios/create/", CreateComentario.as_view(), name="comentario-create"),
     path("comentarios/update/", UpdateComentario.as_view(), name="comentario-update"),
     path("comentarios/list/", ListComentarios.as_view(), name="comentario-list"),
@@ -56,11 +57,12 @@ urlpatterns = [
     path("comentarios/like/", LikeComentarioView.as_view(), name="comentario-like"),
     path("comentarios/unlike/", UnlikeComentarioView.as_view(), name="comentario-unlike"),
     path("comentarios/is-helpful/", ComentarioIsHelpful.as_view(), name="comentario-is-helpful"),
-    path("conversas/create/", ConversaCreate.as_view(), name="conversa-create"),
-    path("conversas/detail/", Detail_Conversa.as_view(), name="conversa-detail"),
-    path("conversas/list/", List_Conversas.as_view(), name="conversa-list"),
-    path("mensagens/create/", MensagemCreate.as_view(), name="mensagem-create"),
+    # path("conversas/create/", ConversaCreate.as_view(), name="conversa-create"),
+    # path("conversas/detail/", Detail_Conversa.as_view(), name="conversa-detail"),
+    # path("conversas/list/", List_Conversas.as_view(), name="conversa-list"),
+    # path("mensagens/create/", MensagemCreate.as_view(), name="mensagem-create"),
     path("denuncia/create/", CreateDenuncia.as_view(), name="denuncia-create"),
     path("denuncia/list/", List_Denuncia.as_view(), name="denuncia-list"),
-    path("banned/", banned_User.as_view(), name="banned-user")
+    path("denuncia/banned/", banned_User.as_view(), name="banned-user"),
+    path("denuncia/update/", update_status.as_view(), name="update-status"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

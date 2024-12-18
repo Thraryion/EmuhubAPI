@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
+import base64
 
 from django.contrib.auth.hashers import check_password
 from rest_framework import status
@@ -23,7 +24,10 @@ class Auth:
             user = User.objects.get(email=email)
             if not check_password(password, user.password):
                 return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-
+            if user.is_active == False:
+                return Response({'error': 'User not active'}, status=status.HTTP_401_UNAUTHORIZED)
+            if user.is_banned == True:
+                return Response({'error': 'User banned'}, status=status.HTTP_401_UNAUTHORIZED)
             token = self.Token.create_token(user.id, user.admin, datetime.utcnow() + timedelta(minutes=60))
             refresh_token = self.Token.create_token(user.id, user.admin, datetime.utcnow() + timedelta(days=7))
 
@@ -60,10 +64,10 @@ class Auth:
             subject = "Reset your password"
             message = f'''Olá,<br><br>
             Clique no link abaixo para alterar a senha:<br><br>
-            <a href="http://52.45.165.140:5173/reset-password?token={token}">Clique aqui</a>'''
+            <a href="http://52.45.165.140:5174/reset-password?token={token}">Clique aqui</a>'''
 
             msg = MIMEMultipart()
-            msg['From'] = settings.EMAIL_HOST_USERail.outlook.com
+            msg['From'] = settings.EMAIL_HOST_USER
             msg['To'] = email
             msg['Subject'] = subject
             msg.attach(MIMEText(message, 'html'))
@@ -110,6 +114,14 @@ class Auth:
             return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
     
     def verify_token(self, token):
+        if token is None:
+            return Response({'error': 'Token not provided'}, status=status.HTTP_401_UNAUTHORIZED)
+        payload = Token.decode_token(token)
+        if payload is None:
+            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+        return payload
+
+    def verify_token_admin(self, token):
         if token is None:
             return Response({'error': 'Token not provided'}, status=status.HTTP_401_UNAUTHORIZED)
         payload = Token.decode_token(token)

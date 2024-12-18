@@ -31,10 +31,11 @@ class ComentarioTests(APITestCase):
         url = reverse('comentario-create')
         data = {
             "id_topico": self.topico.id,
-            "descricao": "test comentario 2"
-            
+            "descricao": "test comentario 2",
+            "id_parent": ''
         }
         response = self.client.post(url, data, HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        print(response)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Comentario.objects.count(), 2)
 
