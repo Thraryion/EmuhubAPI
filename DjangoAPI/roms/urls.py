@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (
-                    ROMDelete, ROMCreate, ROMListView, ROMUpdate, ROMDownload, ROMDetailView,
+                    ROMDelete, ROMCreate, ROMListView, ROMUpdate, ROMDownload, ROMDetailView, DownloadImage,
                     UserRegister, UserViewWishlist, UserAddWishlist, UserDelete, UserListView, UserRemoveWishlist, 
                     UserUpdate, UserDetailView, RefreshToken, Login, MostPlayed, ForgotPassword, ResetPassword,
                     Emuladores, Categorias, EmuladorCreate, EmuladorUpdate, EmuladorDelete, EmuladorDownload,
@@ -17,6 +17,7 @@ urlpatterns = [
     path("roms/", ROMListView.as_view(), name="rom-list"),
     path("roms/detail/", ROMDetailView.as_view(), name="rom-detail"),
     path("roms/search/", SearchRom.as_view(), name="search-rom"),
+    path("roms/img/download/", DownloadImage.as_view(), name="download-img")
     path('roms/mostplayed/', MostPlayed.as_view(), name='rom-mostplayed'),
     path("roms/<str:emulador_name>/<str:game_name>/download/", ROMDownload.as_view(), name="rom-download"),
     path("roms/update/", ROMUpdate.as_view(), name="rom-update"),

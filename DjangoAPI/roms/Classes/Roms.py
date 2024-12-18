@@ -130,3 +130,15 @@ class Roms():
                 return response
             except Exception as e:
                 return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def DownloadImage(self, image_path):
+        try:
+            if os.path.exists(image_path):
+                with open(image_path, 'rb') as img_file:
+                    response = HttpResponse(img_file.read(), content_type="image/png")
+                    response['Content-Disposition'] = 'attachment; filename="image.png"'
+                    return response
+            else:
+                return Response({'error': 'Imagem não encontrada'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

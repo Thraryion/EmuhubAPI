@@ -1,4 +1,4 @@
-from .Rom_view import ROMCreate, ROMDelete, ROMListView, ROMUpdate, ROMDownload, ROMDetailView, MostPlayed
+from .Rom_view import ROMCreate, ROMDelete, ROMListView, ROMUpdate, ROMDownload, ROMDetailView, MostPlayed, DownloadImage
 from .Users_view import UserRegister, UserDelete, UserListView, UserUpdate, UserDetailView
 from .Emulador_view import EmuladorCreate, EmuladorDelete, Emuladores, EmuladorUpdate, EmuladorDownload, Categorias
 from .Topicos_view import CreateTopico, DeleteTopico, ListTopicos, UpdateTopico, TopicoDetail, LikeTopicoView, UnlikeTopicoView, list_categorias
