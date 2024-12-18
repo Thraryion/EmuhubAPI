@@ -1,3 +1,10 @@
+# Arquivos de configuração local
+Server/settings.py
+
+# Docker e Docker Compose
+docker-compose.yml
+docker-compose.override.yml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
