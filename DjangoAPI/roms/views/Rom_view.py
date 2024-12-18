@@ -178,8 +178,9 @@ class DownloadImage(APIView):
             200: "Imagem do ROM",
             404: "ROM não encontrado"
         })
-    def get(self, request, rom_name):
+    def get(self, request):
         try:
+            rom_name = request.GET.get('rom_name')
             rom = ROM.objects.get(title=rom_name)
             image_path = rom.image.path
             if image_path:
